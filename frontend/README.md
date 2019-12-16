@@ -2,13 +2,13 @@
 
 **在 `/frontend` 目录下运行下面的指令**
 ## 安装依赖
-```
-npm install
+```bash
+npm install #这可能会需要比较长的时间
 ```
 
 ### HMR开发
-```
-npm run serve
+```bash
+npm run serve # 然后在 localhost:3000访问页面
 ```
 
 ### 生产环境构建
