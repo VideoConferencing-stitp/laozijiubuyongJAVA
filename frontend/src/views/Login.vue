@@ -6,18 +6,14 @@
         <el-form
           :model="form"
           ref="form"
-          label-width="100px"
-          class="demo-ruleForm"
         >
           <el-form-item
-            label="账号"
             prop="age"
             :rules="[{ required: true, message: '账号不能为空'},{ type: 'number', message: '账号必须为数字值'}]"
           >
             <el-input type="age" v-model.number="form.age" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item
-            label="密码"
             prop="age"
             :rules="[{ required: true, message: '密码不能为空'},{ type: 'number', message: '密码必须为数字值'}]"
           >
@@ -64,14 +60,18 @@ export default {
 }
 .login__wrapper {
   width: 26rem;
-  border: 3px solid gainsboro;
-  box-shadow: 6px 6px 0 0 rgb(88, 88, 88);
+  padding: 1rem 3rem;
+  border-radius: 4px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 6px 0px;
+}
+.login__title {
+  margin: 1.5rem 0;
 }
 .login__form {
-  display: inline-block;
+  width: 100%;
 }
 .login-button {
-  width: 80%;
+  width: 100%;
   margin-bottom: 2rem;
 }
 </style>

@@ -1,6 +1,10 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <transition name="flow" appear>
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
+    </transition>
   </div>
 </template>
 
@@ -21,5 +25,19 @@ export default {
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+.flow-enter-active {
+  transition: all 0.3s ease;
+}
+.flow-leave-active {
+  transition: none;
+}
+.flow-enter,
+.flow-leave-to {
+  transform-origin: center center;
+  transform: translateY(10px);
+  opacity: 0;
 }
 </style>

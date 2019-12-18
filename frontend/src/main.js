@@ -6,7 +6,6 @@ import router from './router'
 import store from './store'
 import VueQrcode from '@chenfengyuan/vue-qrcode';
 
-
 Vue.component(VueQrcode.name, VueQrcode);
 Vue.use(ElementUI)
 Vue.config.productionTip = false
