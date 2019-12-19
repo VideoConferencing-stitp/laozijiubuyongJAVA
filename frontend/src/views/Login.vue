@@ -11,13 +11,13 @@
             prop="age"
             :rules="[{ required: true, message: '账号不能为空'},{ type: 'number', message: '账号必须为数字值'}]"
           >
-            <el-input type="age" v-model.number="form.age" autocomplete="off"></el-input>
+            <el-input placeholder="账号" type="age" v-model.number="form.age" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item
             prop="age"
             :rules="[{ required: true, message: '密码不能为空'},{ type: 'number', message: '密码必须为数字值'}]"
           >
-            <el-input type="age" v-model.number="form.age" autocomplete="off"></el-input>
+            <el-input placeholder="密码" type="age" v-model.number="form.age" autocomplete="off"></el-input>
           </el-form-item>
           <el-button class="login-button" type="primary" @click="submitForm('form')">登录</el-button>
         </el-form>
