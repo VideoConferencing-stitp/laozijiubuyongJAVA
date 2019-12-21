@@ -19,7 +19,7 @@ git clone git@github.com:VideoConferencing-stitp/laozijiubuyongJAVA.git
 **分支管理：**
 开发之前先切换到一个新的分支格式如下：
 ```bash
-git checkout your-name #你的名字
+git checkout -b your-name #你的名字
 ```
 开发完了之后，先推送到自己的远程仓库，然后再点击 pull request，合并到主仓库的master分支。
 
