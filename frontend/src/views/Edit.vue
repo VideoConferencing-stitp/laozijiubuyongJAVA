@@ -1,38 +1,54 @@
 <template>
   <div class="edit">
-    <!-- QN === questionnaire -->
-    <!-- 问卷标题 -->
-    <div class="QN__title">
-      <h1>{{questionnaire.title}}</h1>
+    <div class="header">
+      <el-page-header @back="() => $router.back()" :content="questionnaire.title" />
     </div>
-    <!-- 问卷描述 -->
-    <div class="QN__description">
-      <p>{{questionnaire.description}}</p>
+    <!-- QN === questionnaire -->
+    <div class="QN__header">
+      <!-- 问卷标题 -->
+      <div class="QN__title">
+        <h1>{{questionnaire.title}}</h1>
+      </div>
+      <!-- 问卷描述 -->
+      <div class="QN__description">
+        <p>{{questionnaire.description}}</p>
+      </div>
     </div>
     <!-- 问卷内容 -->
     <div class="QN__questions">
-      <template v-for="(question, i) of questionnaire.questions">
+      <div class="QN__question" v-for="(question, i) of questionnaire.questions" :key="i">
         <!-- 单选 -->
-        <div v-if="question.type === 'radio'" :key="i">
+        <div v-if="question.type === 'radio'">
           <p>{{question.title}}</p>
           <el-radio-group v-model="question.radio">
-            <el-radio v-for="(label, j) of question.labels" :key="j" :label="label">{{ label }}</el-radio>
+            <el-radio
+              class="el-radio"
+              v-for="(label, j) of question.labels"
+              :key="j"
+              :label="label"
+            >{{ label }}</el-radio>
           </el-radio-group>
         </div>
         <!-- 多选 -->
-        <div v-else-if="question.type === 'checkbox'" :key="i">
+        <div v-else-if="question.type === 'checkbox'">
           <p>{{question.title}}</p>
           <el-checkbox-group v-model="question.checkList">
-            <el-checkbox v-for="(lable, j) of question.labels" :label="lable" :key="j"></el-checkbox>
+            <el-checkbox
+              class="el-checkbox"
+              v-for="(lable, j) of question.labels"
+              :label="lable"
+              :key="j"
+            ></el-checkbox>
           </el-checkbox-group>
         </div>
         <!-- 填空 -->
-        <div class v-else-if="question.type === 'texteare'" :key="i">
+        <div class v-else-if="question.type === 'texteare'">
           <p>{{question.title}}</p>
           <el-input v-model="question.value">texteare</el-input>
         </div>
-      </template>
+      </div>
     </div>
+    <el-button class="release-button" type="primary" size="medium">发布</el-button>
   </div>
 </template>
 <script>
@@ -43,26 +59,26 @@ export default {
   data() {
     return {
       questionnaire: {
-        title: "🎉🎉车克闹",
+        title: "🎉🎉你看到的这是他吗的个标题",
         description: "你看这个碗他又大又圆，你看这个面他又长又宽",
         questions: [
           {
             type: "radio", // 单选
-            title: "How old are you?",
+            title: "这他吗的是个单选题？",
             radio: "A",
             labels: ["10-19", "20-22", "35+"]
           },
           {
             type: "checkbox", // 多选
-            title: "How old are you?",
+            title: "这他吗的不是个多选题？",
             checkList: ["A"],
             labels: ["A", "B", "C"]
           },
           {
             type: "texteare", //填空
-            title: "How old are you?",
+            title: "我没告诉你这是个填空题？",
             value: "描述你的想法"
-          },
+          }
         ]
       }
     };
@@ -76,4 +92,54 @@ export default {
 };
 </script>
 <style scoped lang='scss'>
+.edit {
+  padding-bottom: 5rem;
+}
+.header {
+  padding: 1.5rem 2rem;
+  border-bottom: solid 1px #e6e6e6;
+  margin-bottom: 1rem;
+}
+
+.QN__title {
+  h1 {
+    text-align: center;
+    margin-bottom: 0.8em;
+  }
+}
+
+.QN__description {
+  p {
+    text-align: center;
+  }
+}
+
+.QN__header,
+.QN__question {
+  padding: 2rem 4rem;
+  margin: 1rem 3rem;
+}
+
+.QN__questions {
+  margin-bottom: 3rem;
+}
+
+.QN__question {
+  border-radius: 4px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
+  p {
+    margin-bottom: 1em;
+  }
+}
+
+.el-radio,
+.el-checkbox {
+  display: block;
+  padding: 0.5em;
+}
+.release-button {
+  display: block;
+  width: 10rem;
+  margin: 0 auto;
+}
 </style>

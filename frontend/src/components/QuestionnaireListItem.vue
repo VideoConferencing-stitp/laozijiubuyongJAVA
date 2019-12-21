@@ -2,8 +2,8 @@
   <div class="questionnaire-list-item">
     <span class="questionnaire-list-item__title">{{ title }}</span>
     <div class="questionnaire-list-item__controler">
-      <el-button type="primary" size="mini">编辑问卷</el-button>
-      <el-button type="danger" size="mini" plain>删除问卷</el-button>
+      <el-button type="primary" size="mini" @click="handleClick">数据</el-button>
+      <el-button type="danger" size="mini" plain>删除</el-button>
     </div>
   </div>
 </template>
@@ -16,7 +16,11 @@ export default {
       default: 'null'
     }
   },
-  methods: {}
+  methods: {
+    handleClick() {
+      this.$router.push('/visualize')
+    }
+  }
 };
 </script>
 <style scoped lang='scss'>
@@ -24,7 +28,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
   padding: 1rem;
   border-radius: 4px;
   margin: 1rem;
