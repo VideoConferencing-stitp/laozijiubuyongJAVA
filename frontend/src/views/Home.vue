@@ -53,6 +53,9 @@ export default {
 .menu {
   margin-bottom: 1rem;
 }
+.controler {
+  padding: 1rem;
+}
 .controler__btn-1{
 }
 </style>
