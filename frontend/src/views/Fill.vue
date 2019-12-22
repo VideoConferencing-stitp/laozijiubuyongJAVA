@@ -1,0 +1,118 @@
+<template>
+  <div v-if="questionnaire" class="fill">
+    <div class="header">
+      <el-page-header @back="() => $router.back()"/>
+    </div>
+    <!-- QN === questionnaire -->
+    <div class="QN__header">
+      <!-- 问卷标题 -->
+      <div class="QN__title">
+        <h1>{{questionnaire.title}}</h1>
+      </div>
+      <!-- 问卷描述 -->
+      <div class="QN__description">
+        <p>{{questionnaire.description}}</p>
+      </div>
+    </div>
+    <!-- 问卷内容 -->
+    <div class="QN__questions">
+      <div class="QN__question" v-for="(question, i) of questionnaire.questions" :key="i">
+        <!-- 单选 -->
+        <div v-if="question.type === 'radio'">
+          <p>{{question.title}}</p>
+          <el-radio-group v-model="question.radio">
+            <el-radio
+              class="el-radio"
+              v-for="(label, j) of question.labels"
+              :key="j"
+              :label="label"
+            >{{ label }}</el-radio>
+          </el-radio-group>
+        </div>
+        <!-- 多选 -->
+        <div v-else-if="question.type === 'checkbox'">
+          <p>{{question.title}}</p>
+          <el-checkbox-group v-model="question.checkList">
+            <el-checkbox
+              class="el-checkbox"
+              v-for="(lable, j) of question.labels"
+              :label="lable"
+              :key="j"
+            ></el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <!-- 填空 -->
+        <div class v-else-if="question.type === 'texteare'">
+          <p>{{question.title}}</p>
+          <el-input v-model="question.value">texteare</el-input>
+        </div>
+      </div>
+    </div>
+    <el-button class="release-button" type="primary" size="medium">发布</el-button>
+  </div>
+</template>
+<script>
+export default {
+  components: {},
+  name: "Edit",
+  props: {},
+  data() {
+    return {
+      questionnaire: this.$store.state.questionnaire
+    }
+  },
+  methods: {}
+};
+</script>
+<style scoped lang='scss'>
+.fill {
+  padding-bottom: 5rem;
+}
+.header {
+  padding: 1.5rem 2rem;
+  margin-bottom: 1rem;
+}
+
+.QN__title {
+  h1 {
+    text-align: center;
+    margin-bottom: 0.8em;
+  }
+}
+
+.QN__description {
+  p {
+    text-align: center;
+  }
+}
+
+.QN__header,
+.QN__question {
+  padding: 2rem 4rem;
+  margin: 1rem 3rem;
+}
+
+.QN__questions {
+  margin-bottom: 3rem;
+}
+
+.QN__question {
+  border-radius: 4px;
+  // box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
+  border-bottom: solid 1px #e6e6e6;
+  p {
+    margin-bottom: 1em;
+  }
+}
+
+.el-radio,
+.el-checkbox {
+  display: block;
+  padding: 0.5em;
+}
+.release-button {
+  display: block;
+  width: 10rem;
+  margin: 0 auto;
+}
+</style>
