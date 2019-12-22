@@ -36,7 +36,7 @@
         class="QN__question"
         v-for="(question, i) of questionnaire.questions"
         :key="i"
-        @mouseover="hoverQuestion = true;activeQuestionIndex = i"
+        @mouseover="() => { hoverQuestion = true; activeQuestionIndex = i }"
         @mouseout="hoverQuestion = false"
       >
         <i
@@ -122,25 +122,29 @@
   </div>
 </template>
 <script>
-
-const template = {
-  radio: {
-    type: "radio", // 单选
-    title: "这他吗的是个单选题？",
-    radio: "",
-    labels: ["10-19", "20-22", "35+"]
-  },
-  checkbox: {
-    type: "checkbox", // 多选
-    title: "这他吗的不是个多选题？",
-    checkList: [],
-    labels: ["A", "B", "C"]
-  },
-  texteare: {
-    type: "texteare", //填空
-    title: "我没告诉你这是个填空题？",
-    value: "描述你的想法"
-  }
+// 函数返回值保证新产生的数据
+// 不受响应式数据的副作用影响
+const getTemplate = function(type) {
+  const template = {
+    radio: {
+      type: "radio", // 单选
+      title: "这他吗的是个单选题？",
+      radio: "",
+      labels: ["10-19", "20-22", "35+"]
+    },
+    checkbox: {
+      type: "checkbox", // 多选
+      title: "这他吗的不是个多选题？",
+      checkList: [],
+      labels: ["A", "B", "C"]
+    },
+    texteare: {
+      type: "texteare", //填空
+      title: "我没告诉你这是个填空题？",
+      value: "描述你的想法"
+    }
+  };
+  return template[type];
 };
 export default {
   components: {},
@@ -162,10 +166,18 @@ export default {
 
       questionnaire: {
         title: "🎉🎉这里是踏🐎个标题",
-        description: "你看这个碗他又大又圆，你看这个面他又长又宽",
-        questions: [template.radio, template.checkbox, template.texteare]
+        description:
+          "你看这个碗他又大又圆，你看这个面他又长又宽你看这个碗他又大又圆，你看这个面他又长又宽",
+        questions: [
+          getTemplate("radio"),
+          getTemplate("checkbox"),
+          getTemplate("texteare")
+        ]
       }
     };
+  },
+  mounted() {
+    console.log(getTemplate("radio") === getTemplate("radio"));
   },
   methods: {
     handleTitleClick() {
@@ -205,15 +217,23 @@ export default {
     },
 
     deleteQuestion(index) {
-      this.questionnaire.questions = this.questionnaire.questions.filter((item,i) => i !== index)
+      this.questionnaire.questions = this.questionnaire.questions.filter(
+        (item, i) => i !== index
+      );
     },
 
     addQuestion(command) {
-      this.questionnaire.questions.push(template[command])
+      this.questionnaire.questions.push(getTemplate(command));
     },
 
     release() {
-      this.$store.commit('SET_QUESTIONNAIRE', JSON.parse(JSON.stringify(this.questionnaire))) // 深拷贝
+      this.$store.commit(
+        "SET_QUESTIONNAIRE",
+        JSON.parse(JSON.stringify(this.questionnaire))
+        // 深拷贝
+        // 防止GC回收引用值
+        // 导致后续引用点失去引用
+      );
       this.$router.push("/fill");
     }
   }
