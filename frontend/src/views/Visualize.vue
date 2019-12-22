@@ -1,7 +1,7 @@
 <template>
   <div class="visualize">
     <div class="header">
-      <el-page-header @back="() => $router.back()" content="问卷题目"></el-page-header>
+      <el-page-header @back="() => $router.back()" :content="$store.state.questionnaire.title"></el-page-header>
     </div>
     <div class="charts-container">
       <template v-for="(chartData, index) of chartDatas">

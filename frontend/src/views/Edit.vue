@@ -32,7 +32,18 @@
     </div>
     <!-- 问卷内容 -->
     <div class="QN__questions">
-      <div class="QN__question" v-for="(question, i) of questionnaire.questions" :key="i">
+      <div
+        class="QN__question"
+        v-for="(question, i) of questionnaire.questions"
+        :key="i"
+        @mouseover="() => { hoverQuestion = true; activeQuestionIndex = i }"
+        @mouseout="hoverQuestion = false"
+      >
+        <i
+          v-show="hoverQuestion && activeQuestionIndex === i"
+          class="el-icon-delete delete-icon"
+          @click="deleteQuestion(i)"
+        ></i>
         <el-input
           :ref="`title${i}`"
           v-if="questionTitleEditing && currentQuestionTitleIndex === `${i}`"
@@ -44,7 +55,7 @@
         <p v-else @click="handleQuestionTitleClick(`${i}`, `title${i}`)">{{question.title}}</p>
         <!-- 单选 -->
         <div v-if="question.type === 'radio'">
-          <el-radio-group v-model="question.radio">
+          <el-radio-group v-model="question.radio" class="el-radio-group">
             <div v-for="(label, j) of question.labels" :key="j">
               <el-input
                 :ref="`DOM${i}${j}`"
@@ -90,6 +101,7 @@
         </div>
       </div>
     </div>
+    <!-- 操作 -->
     <div class="operation">
       <el-dropdown @command="addQuestion">
         <el-button type="primary">
@@ -104,12 +116,36 @@
       </el-dropdown>
       <el-button-group>
         <el-button class="release-button" type="primary" @click="release">预览</el-button>
-        <el-button class="release-button" type="primary" @click="release">发布</el-button>  
+        <el-button class="release-button" type="primary" @click="release">发布</el-button>
       </el-button-group>
     </div>
   </div>
 </template>
 <script>
+// 函数返回值保证新产生的数据
+// 不受响应式数据的副作用影响
+const getTemplate = function(type) {
+  const template = {
+    radio: {
+      type: "radio", // 单选
+      title: "这他吗的是个单选题？",
+      radio: "",
+      labels: ["10-19", "20-22", "35+"]
+    },
+    checkbox: {
+      type: "checkbox", // 多选
+      title: "这他吗的不是个多选题？",
+      checkList: [],
+      labels: ["A", "B", "C"]
+    },
+    texteare: {
+      type: "texteare", //填空
+      title: "我没告诉你这是个填空题？",
+      value: "描述你的想法"
+    }
+  };
+  return template[type];
+};
 export default {
   components: {},
   name: "Edit",
@@ -121,13 +157,27 @@ export default {
       radioEditing: false,
       checkboxEditing: false,
       questionTitleEditing: false,
+      hoverQuestion: false,
       currentRadioIndex: "",
       currentCheckboxIndex: "",
       currentTitleIndex: "",
       currentQuestionTitleIndex: "",
+      activeQuestionIndex: 0,
 
-      questionnaire: this.$store.state.questionnaire
+      questionnaire: {
+        title: "🎉🎉这里是踏🐎个标题",
+        description:
+          "你看这个碗他又大又圆，你看这个面他又长又宽你看这个碗他又大又圆，你看这个面他又长又宽",
+        questions: [
+          getTemplate("radio"),
+          getTemplate("checkbox"),
+          getTemplate("texteare")
+        ]
+      }
     };
+  },
+  mounted() {
+    console.log(getTemplate("radio") === getTemplate("radio"));
   },
   methods: {
     handleTitleClick() {
@@ -166,11 +216,24 @@ export default {
       });
     },
 
+    deleteQuestion(index) {
+      this.questionnaire.questions = this.questionnaire.questions.filter(
+        (item, i) => i !== index
+      );
+    },
+
     addQuestion(command) {
-      this.$store.commit("ADD_QUESTIONS", command);
+      this.questionnaire.questions.push(getTemplate(command));
     },
 
     release() {
+      this.$store.commit(
+        "SET_QUESTIONNAIRE",
+        JSON.parse(JSON.stringify(this.questionnaire))
+        // 深拷贝
+        // 防止GC回收引用值
+        // 导致后续引用点失去引用
+      );
       this.$router.push("/fill");
     }
   }
@@ -184,6 +247,11 @@ export default {
   padding: 1.5rem 2rem;
   border-bottom: solid 1px #e6e6e6;
   margin-bottom: 1rem;
+}
+.delete-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }
 
 .QN__title {
@@ -201,14 +269,13 @@ export default {
 
 .QN__header,
 .QN__question {
+  position: relative;
   padding: 2rem 4rem;
   margin: 1rem 3rem;
+  border-bottom: solid 1px #e6e6e6;
 }
 
 .QN__question {
-  border-radius: 4px;
-  // box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
-  border-bottom: solid 1px #e6e6e6;
   p {
     margin-bottom: 1em;
   }
@@ -216,6 +283,10 @@ export default {
 
 .QN__questions {
   margin-bottom: 3rem;
+}
+
+.el-radio-group {
+  display: block;
 }
 
 .el-radio,
@@ -231,7 +302,7 @@ export default {
 }
 
 .release-button {
-  width: 10rem;
+  width: 6rem;
   margin-left: 2rem;
 }
 </style>

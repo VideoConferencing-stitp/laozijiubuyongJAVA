@@ -90,19 +90,22 @@ export default {
 .QN__question {
   padding: 2rem 4rem;
   margin: 1rem 3rem;
+  border-bottom: solid 1px #e6e6e6;
+}
+
+.QN__question {
+  p {
+    margin-bottom: 1em;
+  }
 }
 
 .QN__questions {
   margin-bottom: 3rem;
 }
 
-.QN__question {
-  border-radius: 4px;
-  // box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
-  border-bottom: solid 1px #e6e6e6;
-  p {
-    margin-bottom: 1em;
-  }
+
+.el-radio-group {
+  display: block;
 }
 
 .el-radio,
@@ -110,6 +113,8 @@ export default {
   display: block;
   padding: 0.5em;
 }
+
+
 .release-button {
   display: block;
   width: 10rem;

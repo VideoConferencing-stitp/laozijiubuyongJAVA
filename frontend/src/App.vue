@@ -28,14 +28,14 @@ export default {
 }
 
 .flow-enter-active {
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
 .flow-leave-active {
   transition: none;
 }
 .flow-enter,
 .flow-leave-to {
-  transform: translateY(-10px);
+  transform: translateX(-10px);
   opacity: 0;
 }
 </style>
