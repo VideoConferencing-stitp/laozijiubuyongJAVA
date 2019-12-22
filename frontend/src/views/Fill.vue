@@ -56,9 +56,9 @@ export default {
   components: {},
   name: "Edit",
   props: {},
-  data() {
-    return {
-      questionnaire: this.$store.state.questionnaire
+  computed: {
+    questionnaire() {
+      return this.$store.state.questionnaire  
     }
   },
   methods: {}
