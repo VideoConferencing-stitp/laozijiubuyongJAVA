@@ -1,6 +1,6 @@
 <template>
   <div class="questionnaire-list">
-    <QuestionnaireListItem v-for="item of list" :key="item.id" :title="item.title" />
+    <QuestionnaireListItem v-for="item of list" :key="item.id" :data="item" @delete="deleteItem"/>
   </div>
 </template>
 <script>
@@ -16,7 +16,12 @@ export default {
       default: () => []
     }
   },
-  methods: {}
+  methods: {
+    deleteItem(payload) {
+      const { id } = payload
+      this.$store.commit('REMOVE_QUESTIONNAIRE_LIST', id)
+    }
+  }
 };
 </script>
 <style scoped lang='scss'>

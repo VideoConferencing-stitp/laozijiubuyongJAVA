@@ -44,7 +44,7 @@
         <p v-else @click="handleQuestionTitleClick(`${i}`, `title${i}`)">{{question.title}}</p>
         <!-- 单选 -->
         <div v-if="question.type === 'radio'">
-          <el-radio-group v-model="question.radio">
+          <el-radio-group v-model="question.radio" class="el-radio-group">
             <div v-for="(label, j) of question.labels" :key="j">
               <el-input
                 :ref="`DOM${i}${j}`"
@@ -104,7 +104,7 @@
       </el-dropdown>
       <el-button-group>
         <el-button class="release-button" type="primary" @click="release">预览</el-button>
-        <el-button class="release-button" type="primary" @click="release">发布</el-button>  
+        <el-button class="release-button" type="primary" @click="release">发布</el-button>
       </el-button-group>
     </div>
   </div>
@@ -124,10 +124,13 @@ export default {
       currentRadioIndex: "",
       currentCheckboxIndex: "",
       currentTitleIndex: "",
-      currentQuestionTitleIndex: "",
-
-      questionnaire: this.$store.state.questionnaire
+      currentQuestionTitleIndex: ""
     };
+  },
+  computed: {
+    questionnaire() {
+      return this.$store.state.questionnaire;
+    }
   },
   methods: {
     handleTitleClick() {
@@ -203,12 +206,10 @@ export default {
 .QN__question {
   padding: 2rem 4rem;
   margin: 1rem 3rem;
+  border-bottom: solid 1px #e6e6e6;
 }
 
 .QN__question {
-  border-radius: 4px;
-  // box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
-  border-bottom: solid 1px #e6e6e6;
   p {
     margin-bottom: 1em;
   }
@@ -216,6 +217,10 @@ export default {
 
 .QN__questions {
   margin-bottom: 3rem;
+}
+
+.el-radio-group {
+  display: block;
 }
 
 .el-radio,
@@ -231,7 +236,7 @@ export default {
 }
 
 .release-button {
-  width: 10rem;
+  width: 6rem;
   margin-left: 2rem;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
   <div class="questionnaire-list-item">
-    <span class="questionnaire-list-item__title">{{ title }}</span>
+    <span class="questionnaire-list-item__title">{{ data.title }}</span>
     <div class="questionnaire-list-item__controler">
       <el-button type="primary" size="mini" @click="handleClick">数据</el-button>
-      <el-button type="danger" size="mini" plain>删除</el-button>
+      <el-button type="danger" size="mini" @click="deleteSelf" plain>删除</el-button>
     </div>
   </div>
 </template>
@@ -11,14 +11,17 @@
 export default {
   name: "QuestionnaireListItem",
   props: {
-    title: {
-      type: String,
-      default: 'null'
+    data: {
+      type: Object,
+      default: () => ({ title: '标题', id: 0 })
     }
   },
   methods: {
     handleClick() {
       this.$router.push('/visualize')
+    },
+    deleteSelf() {
+      this.$emit('delete', this.data)
     }
   }
 };
@@ -28,8 +31,8 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 6px 0px;
-  padding: 1rem;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 10px -2px;
+  padding: 2rem;
   border-radius: 4px;
   margin: 1rem;
 }
