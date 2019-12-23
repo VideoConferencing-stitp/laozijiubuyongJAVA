@@ -16,6 +16,9 @@ export default new Vuex.Store({
     questionnaire: {}
   },
   mutations: {
+    SET_QUESTIONNAIRE_LIST(state, payload) {
+      state.user.questionnaireList = payload
+    },
     SET_QUESTIONNAIRE(state, payload) {
       state.questionnaire = payload
     },
