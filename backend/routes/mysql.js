@@ -1,14 +1,12 @@
 const router = require('koa-router')()
-const mysql = require('mysql');
+const mysql = require('mysql')
 
 // 测试查表
 router.get('/search', async (ctx, next) => {
 
-    // let connection = SQL.ConnectSQL();
     let connection = ConnectSQL();
     let query = ()=>{
       return new Promise((resolve,reject)=>{
-        //   connection.query(SQL.SQL_SENTENCE().SEARCH_ALL,(err,data) => {
           connection.query(sql.GET_ALL,(err,data) => {
               if(err){
                   resolve({message:err.message})
@@ -18,13 +16,13 @@ router.get('/search', async (ctx, next) => {
       })
     }
     let result = await query();
-    // ctx.body = typeof(result);
     ctx.body = result;
 })
 
 // 获取问卷列表
 router.get('/get-qn-list', async (ctx, next) => {
 
+    // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
     let query = ()=>{
       return new Promise((resolve,reject)=>{
@@ -40,7 +38,12 @@ router.get('/get-qn-list', async (ctx, next) => {
           })
       })
     }
+
+    // 先获取查询结果，再关闭数据库连接（不可颠倒）
     let temp = await query();
+    connection.end();
+
+    // 查询失败则返回501，成功则返回目标数据
     if (temp.code == 501){
         ctx.body = temp;
     } else {
@@ -62,12 +65,11 @@ router.get('/get-qn-list', async (ctx, next) => {
                 qnList.push(qnItem);
             }
         }
-        let result = {
+        ctx.body = {
             "code": 200, 
             "msg": "成功",
             "qnList": qnList
-        }
-        ctx.body = result;
+        };
     }    
 })
 
