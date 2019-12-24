@@ -10,6 +10,7 @@ import Fill from './views/Fill'
 Vue.use(VueRouter)
 
 const routes = [
+  { path: '/', redirect:'/login' },
   { path: '/login', component: Login },
   { path: '/home', component: Home },
   { path: '/visualize', component: Visualize },

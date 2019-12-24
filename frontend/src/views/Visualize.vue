@@ -5,9 +5,19 @@
     </div>
     <div class="charts-container">
       <template v-for="(chartData, index) of chartDatas">
-        <div class="charts-wrapper" :key="index" >
-          <BarChart v-if="chartData.chartType === 'bar'" :chartData="chartData"/>
-          <PieChart v-else-if="chartData.chartType === 'pie'" :chartData="chartData" />
+        <div class="charts-wrapper" :key="index">
+          <el-dropdown @command="type => changeChartType(type, index)">
+            <span class="el-dropdown-link">
+              下拉菜单
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="bar">条形图</el-dropdown-item>
+              <el-dropdown-item command="pie">饼图</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <BarChart v-if="chartTypes[index] === 'bar'" :chartData="chartData" />
+          <PieChart v-else-if="chartTypes[index] === 'pie'" :chartData="chartData" />
         </div>
       </template>
     </div>
@@ -17,6 +27,7 @@
 <script type="text/ecmascript-6">
 import BarChart from "../components/BarChart";
 import PieChart from "../components/PieChart";
+import getQnDataApi from "../api/getQnDataApi";
 
 export default {
   components: {
@@ -26,40 +37,27 @@ export default {
   name: "Visualize",
   data() {
     return {
-      chartDatas: [
-        {
-          chartType: "bar",
-          title:
-            "该数据对应的题目该目该数据对应的题目该数据对应的题目该数据对应的题目该数据对应的题?",
-          data: [
-            { value: 10, name: "A" },
-            { value: 90, name: "B" },
-            { value: 202, name: "C" },
-            { value: 430, name: "D" },
-            { value: 22, name: "F" },
-            { value: 1290, name: "G" }
-          ]
-        },
-        {
-          chartType: "pie",
-          title: "该数据对应的题目该数据对应的题目该数据对应的题目据对应的题?",
-          data: [
-            { value: 10, name: "A" },
-            { value: 90, name: "B" },
-            { value: 202, name: "C" },
-            { value: 430, name: "D" }
-          ]
-        }
-      ]
+      chartDatas: [],
+      chartTypes: [], //存放charts的类型
     };
   },
-  mounted() {
-    
+  created() {
+    this.loadChartData();
+  },
+  watch: {
+    chartDatas(newV) {
+      this.chartTypes = newV.map(item => Math.random() > 0.5 ? 'bar': 'pie')
+    }
   },
   methods: {
-    // updateChartType(index) {
-    //   this.chartDatas.data[index] = 
-    // }
+    async loadChartData() {
+      const res = await getQnDataApi({ qnId: "12345" });
+      const { code, msg, data } = res;
+      this.chartDatas = data.chartDatas;
+    },
+    changeChartType(type, index) {
+      this.chartTypes.splice(index, 1, type)
+    }
   }
 };
 </script>
