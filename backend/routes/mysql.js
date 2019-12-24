@@ -19,6 +19,53 @@ router.get('/search', async (ctx, next) => {
     ctx.body = result;
 })
 
+// 登录
+router.post('/login', async (ctx) => {
+    reqData = ctx.request.body;
+    account = JSON.stringify(reqData.account);
+    password = JSON.stringify(reqData.password);
+
+    // 连接数据库，查询问卷列表
+    let connection = ConnectSQL();
+    let query = ()=>{
+    return new Promise((resolve,reject)=>{
+        connection.query(sql.LOGIN + account,(err,data) => {
+            if(err){
+                resolve({message:err.message})
+            }
+            resolve(data);
+        })
+    })
+    }
+
+    // 先获取查询结果，再关闭数据库连接（不可颠倒）
+    let temp = await query();
+    connection.end();
+
+    // 检查
+    if (!temp.length){
+        ctx.body = {
+            "code": 501,
+            "msg": "用户名错误！",
+            "data": null
+        };
+    } else if (JSON.stringify(temp[0].key) == password){
+        ctx.body = {
+            "code": 200,
+            "msg": "登录成功！",
+            "data": {
+                "userId": temp[0].AID,
+            }
+        }
+    } else {
+        ctx.body = {
+            "code": 501,
+            "msg": "密码错误！",
+            "data": null
+        }
+    }  
+})
+
 // 获取问卷列表
 router.get('/get-qn-list', async (ctx, next) => {
 
@@ -26,7 +73,7 @@ router.get('/get-qn-list', async (ctx, next) => {
     let connection = ConnectSQL();
     let query = ()=>{
       return new Promise((resolve,reject)=>{
-          connection.query(sql.GET_ALL,(err,data) => {
+          connection.query(sql.GET_ALL5,(err,data) => {
               if(err){
                   resolve({
                     "code": 501,
@@ -88,7 +135,9 @@ function ConnectSQL(){
 // sql语句
 var sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
-    GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID'    
+    GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
+    INSERT_QN: "INSERT INTO `questionnaire_survey_system`.`administrator` (`AID`, `telephone`, `key`) VALUES ('A2', '13322258585', '324')",
+    LOGIN: "select * from administrator where telephone ="
 };
 
 module.exports = router
