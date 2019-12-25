@@ -8,11 +8,7 @@ const logger = require('koa-logger')
 const mount = require('koa-mount');
 
 const index = require('./routes/index')
-<<<<<<< Updated upstream
-const users = require('./routes/users')
-=======
 const mysql = require('./routes/mysql')
->>>>>>> Stashed changes
 
 // error handler
 onerror(app)
