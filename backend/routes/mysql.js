@@ -44,7 +44,7 @@ router.post('/login', async (ctx) => {
 
 // 获取问卷列表
 router.get('/get-qn-list', async (ctx, next) => {
-    
+
     let userId = ctx.request.query.userId;
     let values = '\'' + userId + '\'';
     // 连接数据库，查询问卷列表
@@ -124,8 +124,9 @@ router.get('/get-qn', async (ctx, next) => {
             }
             let temp2 = await query();
             let labels = new Array();
+            console.log(temp2)
             for (let j = 0; j < temp2.length; j++) {
-                labels[j] = temp2[j].contexts;
+                labels[j] = temp2[j].qcontexts;
             }  
             let detail = {
                 "qId": temp[i].QuID,
@@ -407,7 +408,7 @@ let sql = {
     SUBMIT_QN_SECOND:'" and QuID= ',
     GET_Q_NAME: "SELECT Qname FROM questionnaire_survey_system.questionnaire WHERE QID=",
     GET_Q_LIST: "SELECT QuID,contexts,type FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID and questionnaire.QID=",
-    GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID=",
+    GET_Q_OPTIONS: "SELECT OID,qoption.qcontexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID=",
     INSERT_QUESTIONNAIRE: "INSERT INTO questionnaire_survey_system.questionnaire (Qname, Qnum, deadline, release_time, release_way, AID, Qstatus) VALUES ",
     INSERT_QUESTION: "INSERT INTO questionnaire_survey_system.question (type, remarks, contexts, QID) VALUES ",
     INSERT_QOPTION: "INSERT INTO questionnaire_survey_system.qoption (qcontexts, op_num, QuID, remark) VALUES "
