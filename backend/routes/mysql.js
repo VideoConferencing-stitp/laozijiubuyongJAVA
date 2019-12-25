@@ -163,18 +163,22 @@ router.post('/delete-qn', async (ctx, next) => {
     let connection = ConnectSQL();
     reqData=ctx.request.body;
     deQnId=JSON.stringify(reqData.qnId);
-    console.log(reqData.qnId);
     let query = ()=>{
       return GetResult(connection,sql.DELETE_QN+deQnId)
     }
-
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
     let temp = await query();
     connection.end();
 
+    console.log(temp);
     // 查询失败则返回501，成功则返回200,成功
     if (temp.code == 501){
         ctx.body = temp;
+    } else if(temp.affectedRows==0){
+        ctx.body = {
+            "code": 501, 
+            "msg": "不存在此问卷"
+        };
     } else {
         ctx.body = {
             "code": 200, 
@@ -188,6 +192,7 @@ router.get('/get-qn-data', async (ctx, next) => {
 
     reqData=ctx.request.query;
     qnId=JSON.stringify(reqData.qnId);
+    console.log(qnId);
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
     let query = ()=>{
@@ -203,41 +208,52 @@ router.get('/get-qn-data', async (ctx, next) => {
         temp.msg = "无法统计问卷数据，请检查网络连接！"
         ctx.body = temp;
     }else{
-        data={};
-        data.id=qnId;
-        //获取到的数据总长度
-        len=temp.length;
-        //标题，数据内容数组
-        chartDatas=[];
-        var cIndex=0;
-        nowTitle=temp[0].contexts;
-        chartDatas[cIndex]={}
-        chartDatas[cIndex].title=temp[0].contexts;
-        chartDatas[cIndex].data=[];
-        for(var i=0;i<len;i++)
+        if(temp.length!=0)
         {
-            if(nowTitle==temp[i].contexts)
+            data={};
+            qnId=qnId.substr(1,qnId.length-2);
+            data.id=qnId;
+            //获取到的数据总长度
+            len=temp.length;
+            //标题，数据内容数组
+            chartDatas=[];
+            var cIndex=0;
+            nowTitle=temp[0].contexts;
+            chartDatas[cIndex]={}
+            chartDatas[cIndex].title=temp[0].contexts;
+            chartDatas[cIndex].data=[];
+            for(var i=0;i<len;i++)
             {
-                chartDatas[cIndex].data.push({
-                    "value":temp[i].op_num,
-                    "name":temp[i].qcontexts
-                })
-            }
-            else{
-                cIndex++;
-                chartDatas[cIndex]={};
-                chartDatas[cIndex].title=temp[i].contexts;
-                chartDatas[cIndex].data=[];
-                nowTitle=temp[i].contexts;
-            }
-        }
-        data.chartDatas=chartDatas;
-        ctx.body = {
-            "code": 200, 
-            "msg": "数据获取成功",
-            "data":data
-        };
-    }
+                if(nowTitle==temp[i].contexts)
+                {
+                    chartDatas[cIndex].data.push({
+                        "value":temp[i].op_num,
+                        "name":temp[i].qcontexts
+                    })
+                }//if
+                else{
+                    cIndex++;
+                    chartDatas[cIndex]={};
+                    chartDatas[cIndex].title=temp[i].contexts;
+                    chartDatas[cIndex].data=[];
+                    nowTitle=temp[i].contexts;
+                }//else
+            }//for
+            data.chartDatas=chartDatas;
+            ctx.body = {
+                "code": 200, 
+                "msg": "数据获取成功",
+                "data":data
+            };
+        }//if
+        else{
+            ctx.body = {
+                "code": 501, 
+                "msg": "没有此问卷"
+            };
+        }//else
+    }//else
+
 })
 
 // 连接数据库
@@ -245,7 +261,7 @@ function ConnectSQL(){
     let connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
-        password : '263785czx',
+        password : '981022',
         database : 'questionnaire_survey_system'
     });
     connection.connect();
@@ -269,14 +285,17 @@ function GetResult(connection, sqlSentence){
 }
 
 
-
-
 /*
 * sql语句
 *   GET_ALL: 获取问卷列表
 *   LOGIN: 获取登录信息
 *   GET_Q_NAME: 获取指定Id的问卷名字
 *   GET_Q_LIST: 获取指定问卷Id的问题列表
+*   DELETE_QN:删除问卷
+*   GET_QN_DATA_FIRST:获取问卷数据语句前半部分
+*   GET_QN_DATA_SECOND:获取问卷数据语句后半部分
+*   SUBMIT_QN：向数据库插入提交的选项
+*   
 */
 let sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
