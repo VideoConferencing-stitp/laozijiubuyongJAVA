@@ -120,6 +120,42 @@ router.get('/get-qn-list', async (ctx, next) => {
     }    
 })
 
+//删除问卷
+router.post('/delete-qn', async (ctx, next) => {
+
+    // 连接数据库，查询问卷列表
+    let connection = ConnectSQL();
+    reqData=ctx.request.body;
+    deQnId=JSON.stringify(reqData.qnId);
+    let query = ()=>{
+      return new Promise((resolve,reject)=>{
+          connection.query(sql.DELETE_QN+deQnId,(err,data) => {
+              if(err){
+                  resolve({
+                    "code": 501,
+                    "msg": "删除失败"
+                })
+              }
+              resolve(data);
+          })
+      })
+    }
+
+    // 先获取查询结果，再关闭数据库连接（不可颠倒）
+    let temp = await query();
+    connection.end();
+
+    // 删除失败则返回501，成功则返回200
+    if (temp.code == 501){
+        ctx.body = temp;
+    } else {
+        ctx.body = {
+            "code": 200, 
+            "msg": "成功"
+        };
+    }    
+})
+
 // 连接数据库
 function ConnectSQL(){
     let connection = mysql.createConnection({
@@ -137,7 +173,8 @@ var sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
     GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
     INSERT_QN: "INSERT INTO `questionnaire_survey_system`.`administrator` (`AID`, `telephone`, `key`) VALUES ('A2', '13322258585', '324')",
-    LOGIN: "select * from administrator where telephone ="
+    LOGIN: "select * from administrator where telephone =",
+    DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID ="
 };
 
 module.exports = router
