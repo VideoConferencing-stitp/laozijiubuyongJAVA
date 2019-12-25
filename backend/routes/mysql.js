@@ -3,13 +3,14 @@ const mysql = require('mysql')
 
 // 登录
 router.post('/login', async (ctx) => {
+
     reqData = ctx.request.body;
     account = JSON.stringify(reqData.account);
     password = JSON.stringify(reqData.password);
 
-    // 连接数据库，查询问卷列表
+    // 连接数据库，查询管理员表
     let connection = ConnectSQL();
-    let query = ()=>{
+    let query = () => {
         return GetResult(connection, sql.LOGIN + account);
     }
 
@@ -18,13 +19,13 @@ router.post('/login', async (ctx) => {
     connection.end();
 
     // 检查
-    if (!temp.length){
+    if (!temp.length) {
         ctx.body = {
             "code": 501,
             "msg": "用户名错误！",
             "data": null
         };
-    } else if (JSON.stringify(temp[0].key) == password){
+    } else if (JSON.stringify(temp[0].key) == password) {
         ctx.body = {
             "code": 200,
             "msg": "登录成功！",
@@ -47,8 +48,13 @@ router.get('/get-qn-list', async (ctx, next) => {
     let values = '\'' + userId + '\'';
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
+<<<<<<< Updated upstream
     let query = ()=>{
       return GetResult(connection, sql.GET_ALL + values);
+=======
+    let query = () => {
+      return GetResult(connection, sql.GET_ALL);
+>>>>>>> Stashed changes
     }
 
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
@@ -56,13 +62,13 @@ router.get('/get-qn-list', async (ctx, next) => {
     connection.end();
 
     // 查询失败则返回501，成功则返回目标数据
-    if (temp.code == 501){
+    if (temp.code == 501) {
         temp.msg = "无法获取问卷列表，请检查网络连接！"
         ctx.body = temp;
     } else {
         let qnList = [];
-        if (temp.length > 10){
-            for (let i = 0; i < 10; i++){
+        if (temp.length > 10) {
+            for (let i = 0; i < 10; i++) {
                 let qnItem = {
                     "id": temp[i].QID,
                     "title": temp[i].Qname
@@ -70,7 +76,7 @@ router.get('/get-qn-list', async (ctx, next) => {
                 qnList.push(qnItem);
             }
         } else {
-            for (let i = 0; i < temp.length; i++){
+            for (let i = 0; i < temp.length; i++) {
                 let qnItem = {
                     "id": temp[i].QID,
                     "title": temp[i].Qname
@@ -88,17 +94,18 @@ router.get('/get-qn-list', async (ctx, next) => {
 
 // 获取问卷内容
 router.get('/get-qn', async (ctx, next) => {
+
     let reqQue = ctx.request.query;
     let qnId = JSON.stringify(reqQue.qnId);
 
     // 连接数据库
     let connection = ConnectSQL();
-    let query = ()=>{
+    let query = () => {
         return GetResult(connection, sql.GET_Q_NAME + qnId);
     }
     let temp = await query();
     // 问卷号错误/已被删除/不存在
-    if (temp.length === 0){
+    if (temp.length === 0) {
         ctx.body = {
             "code": 501,
             "msg": "不存在此问卷",
@@ -109,19 +116,19 @@ router.get('/get-qn', async (ctx, next) => {
         // 提取当前问卷名
         Qname = temp[0].Qname;
         // 提取当前问卷题目
-        query = ()=>{
+        query = () => {
             return GetResult(connection, sql.GET_Q_LIST + qnId)
         }
         temp = await query();
         let questions = new Array();
-        for (let i = 0; i < temp.length; i++){
+        for (let i = 0; i < temp.length; i++) {
             // 提取当前问卷某题的选项
-            query = ()=>{
+            query = () => {
                 return GetResult(connection, sql.GET_Q_OPTIONS + temp[i].QuID)
             }
             let temp2 = await query();
             let labels = new Array();
-            for (let j = 0; j < temp2.length; j++){
+            for (let j = 0; j < temp2.length; j++) {
                 labels[j] = temp2[j].contexts;
             }  
             let detail = {
@@ -151,20 +158,19 @@ router.post('/delete-qn', async (ctx, next) => {
 
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
-    reqData=ctx.request.body;
-    deQnId=JSON.stringify(reqData.qnId);
-    let query = ()=>{
-      return GetResult(connection,sql.DELETE_QN+deQnId)
+    reqData = ctx.request.body;
+    deQnId = JSON.stringify(reqData.qnId);
+    let query = () => {
+      return GetResult(connection, sql.DELETE_QN + deQnId)
     }
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
     let temp = await query();
     connection.end();
 
-    console.log(temp);
     // 查询失败则返回501，成功则返回200,成功
-    if (temp.code == 501){
+    if (temp.code == 501) {
         ctx.body = temp;
-    } else if(temp.affectedRows==0){
+    } else if (temp.affectedRows == 0) {
         ctx.body = {
             "code": 501, 
             "msg": "不存在此问卷"
@@ -179,32 +185,34 @@ router.post('/delete-qn', async (ctx, next) => {
 
 //提交答案
 router.post('/submit-qn' , async (ctx,next) => {
-    reqData=ctx.request.body;
-    answerList=reqData.answers;
+
+    reqData = ctx.request.body;
+    answerList = reqData.answers;
     let connection = ConnectSQL();
     //监测是否全部插入成功
-    var flag=true;
-    var len=answerList.length;
-    for(var i=0;i<len;i++){
-        qId=answerList[i].qId;
-        tempCheck=answerList[i].checkList;
-        for(var j=0;j<tempCheck.length;j++){
-            let query = ()=>{
-                return GetResult(connection, sql.SUBMIT_QN_FIRST+tempCheck[j]+sql.SUBMIT_QN_SECOND+qId);
+    let flag = true;
+    let len = answerList.length;
+    for (let i = 0; i < len; i++) {
+        qId = answerList[i].qId;
+        tempCheck = answerList[i].checkList;
+        for (let j = 0; j < tempCheck.length; j++) {
+            let query = () => {
+                return GetResult(connection, sql.SUBMIT_QN_FIRST + tempCheck[j]
+                                + sql.SUBMIT_QN_SECOND + qId);
             }
             let temp = await query();
-            if(temp.code==501){
-                flag=false;
+            if (temp.code == 501) {
+                flag = false;
                 break;
             }//if
         }//for
     }//for
-    if (flag){
+    if (flag) {
         ctx.body = {
             "code": 200, 
             "msg": "插入成功"
         };
-    }else{
+    } else {
         ctx.body = {
             "code": 501, 
             "msg": "插入失败"
@@ -215,13 +223,13 @@ router.post('/submit-qn' , async (ctx,next) => {
 // 获取问卷统计数据
 router.get('/get-qn-data', async (ctx, next) => {
 
-    reqData=ctx.request.query;
-    qnId=JSON.stringify(reqData.qnId);
-    console.log(qnId);
+    reqData = ctx.request.query;
+    qnId = JSON.stringify(reqData.qnId);
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
-    let query = ()=>{
-      return GetResult(connection, sql.GET_QN_DATA_FIRST+qnId+sql.GET_QN_DATA_SECNOD);
+    let query = () => {
+      return GetResult(connection, sql.GET_QN_DATA_FIRST + qnId 
+                        + sql.GET_QN_DATA_SECNOD);
     }
 
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
@@ -229,46 +237,46 @@ router.get('/get-qn-data', async (ctx, next) => {
     connection.end();
 
     // 查询失败则返回501，成功则返回目标数据
-    if (temp.code == 501){
+    if (temp.code == 501) {
         temp.msg = "无法统计问卷数据，请检查网络连接！"
         ctx.body = temp;
-    }else{
-        if(temp.length!=0){
-            data={};
-            qnId=qnId.substr(1,qnId.length-2);
-            data.id=qnId;
+    } else {
+        if (temp.length != 0) {
+            data = {};
+            qnId = qnId.substr(1, qnId.length - 2);
+            data.id = qnId;
             //获取到的数据总长度
-            len=temp.length;
+            len = temp.length;
             //标题，数据内容数组
-            chartDatas=[];
-            var cIndex=0;
-            nowTitle=temp[0].contexts;
-            chartDatas[cIndex]={}
-            chartDatas[cIndex].title=temp[0].contexts;
-            chartDatas[cIndex].data=[];
-            for(var i=0;i<len;i++){
-                if(nowTitle==temp[i].contexts){
+            chartDatas = [];
+            let cIndex = 0;
+            nowTitle = temp[0].contexts;
+            chartDatas[cIndex] = {}
+            chartDatas[cIndex].title = temp[0].contexts;
+            chartDatas[cIndex].data = [];
+            for (let i = 0; i < len; i++) {
+                if (nowTitle == temp[i].contexts) {
                     chartDatas[cIndex].data.push({
                         "value":temp[i].op_num,
                         "name":temp[i].qcontexts
                     })
                 }//if
-                else{
+                else {
                     cIndex++;
-                    chartDatas[cIndex]={};
-                    chartDatas[cIndex].title=temp[i].contexts;
-                    chartDatas[cIndex].data=[];
+                    chartDatas[cIndex] = {};
+                    chartDatas[cIndex].title = temp[i].contexts;
+                    chartDatas[cIndex].data = [];
                     nowTitle=temp[i].contexts;
                 }//else
             }//for
-            data.chartDatas=chartDatas;
+            data.chartDatas = chartDatas;
             ctx.body = {
                 "code": 200, 
                 "msg": "数据获取成功",
                 "data":data
             };
         }//if
-        else{
+        else {
             ctx.body = {
                 "code": 501, 
                 "msg": "没有此问卷"
@@ -281,34 +289,36 @@ router.get('/get-qn-data', async (ctx, next) => {
 router.post('/create-qn', async (ctx) => {
 
     let qnData = ctx.request.body;
-
+    // 获取创建问卷时所需的相关即时信息
     let finish_time = '2020-02-01';
     let nowDate = new Date();
     let release_time = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1)
                     + '-' + nowDate.getDate() + ' ' + nowDate.getHours() + ':'
                     + nowDate.getMinutes() + ':' + nowDate.getSeconds() + '.0';
     let values = '(\'' + qnData.questionnaire.title + '\',' 
-                + qnData.questionnaire.questions.length + ',\'' + finish_time 
+                + qnData.questionnaire.questions.length + ',\'' + finish_time
                 + '\',\'' + release_time + '\',\'' + '非定时\',\'' + qnData.userId
                 + '\',1)';
     // 连接数据库，插入问卷
     let connection = ConnectSQL();
-    let query = ()=>{
+    let query = () => {
         return GetResult(connection, sql.INSERT_QUESTIONNAIRE + values);
     }
     let temp = await query();
-    if (temp.code == 501){
+    if (temp.code == 501) {
         temp.msg = "增加问卷记录失败，请重试！";
     } else {
 
     // 正确插入问卷后，再插入该问卷的问题
         let qId = temp.insertId;
         let questions = qnData.questionnaire.questions;
-        let flag = true;  // 判断是否发生错误的标记，中途一旦出错，立即修改标记并退出
+        // 判断是否发生错误的标记，中途一旦出错，立即修改标记并退出
+        let flag = true;
         for (let i = 0; i < questions.length & flag; i++) {
             let type = questions[i].type == "radio" ? "单选" : "多选";
-            values = '(\'' + type + '\',\'必填\',\'' + questions[i].title + '\',' + qId + ')';
-            query = ()=>{
+            values = '(\'' + type + '\',\'必填\',\'' + questions[i].title
+                    + '\',' + qId + ')';
+            query = () => {
                 return GetResult(connection, sql.INSERT_QUESTION + values);
             }
             temp = await query();
@@ -323,9 +333,11 @@ router.post('/create-qn', async (ctx) => {
                 let labels = questions[i].labels;
                 for (let j = 0, charCode = 65; j < labels.length; j++) {
                     let remark = String.fromCharCode(charCode++);
-                    values = '(\'' + labels[j] + '\',' + '0,' + quId + ',\'' + remark + '\')'
-                    query = ()=>{
-                        return GetResult(connection, sql.INSERT_QOPTION + values);
+                    values = '(\'' + labels[j] + '\',' + '0,' + quId 
+                            + ',\'' + remark + '\')'
+                    query = () => {
+                        return GetResult(connection, sql.INSERT_QOPTION 
+                                        + values);
                     }
                     temp = await query();
                     if (temp.code == 501) {
@@ -342,7 +354,8 @@ router.post('/create-qn', async (ctx) => {
 })
 
 // 连接数据库
-function ConnectSQL(){
+function ConnectSQL() {
+
     let connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
@@ -354,10 +367,11 @@ function ConnectSQL(){
 }
 
 // 获取数据库执行结果
-function GetResult(connection, sqlSentence){
-    return new Promise((resolve,reject)=>{
+function GetResult(connection, sqlSentence) {
+
+    return new Promise((resolve,reject) => {
         connection.query(sqlSentence,(err,data) => {
-            if(err){
+            if (err) {
                 resolve( resolve({
                     "code": 501,
                     "msg": "",
