@@ -43,11 +43,12 @@ router.post('/login', async (ctx) => {
 
 // 获取问卷列表
 router.get('/get-qn-list', async (ctx, next) => {
-
+    let userId = ctx.request.query.userId;
+    let values = '\'' + userId + '\'';
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
     let query = ()=>{
-      return GetResult(connection, sql.GET_ALL);
+      return GetResult(connection, sql.GET_ALL + values);
     }
 
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
@@ -385,7 +386,7 @@ function GetResult(connection, sqlSentence){
 *   INSERT_QOPTION: 新增选项记录
 */
 let sql = {
-    GET_ALL: 'SELECT * FROM questionnaire', 
+    GET_ALL: 'SELECT * FROM questionnaire WHERE AID = ', 
     GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
     INSERT_QN: "INSERT INTO `questionnaire_survey_system`.`administrator` (`AID`, `telephone`, `key`) VALUES ('A2', '13322258585', '324')",
     LOGIN: "select * from administrator where telephone =",
