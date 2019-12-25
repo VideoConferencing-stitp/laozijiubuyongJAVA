@@ -1,19 +1,20 @@
 const router = require('koa-router')()
+const fs = require('fs')
+const path = require('path')
 
-router.get('/', async (ctx, next) => {
-  await ctx.render('index', {
-    title: 'Hello Koa 2!'
-  })
-})
+// app.use(require('koa-static')(__dirname + '/public'))
+// 由于中间件的存在
+// 默认的会以 /public/index.html
+// 为 “/” 路径的返回
 
-router.get('/string', async (ctx, next) => {
-  ctx.body = 'koa2 string'
-})
+// router.get('/fill-qn', async (ctx, next) => {
+//   ctx.type = 'text/html';
+//   ctx.body = fs.createReadStream(path.resolve(__dirname, '../public/fill-qn/index.html'));
+// })
 
-router.get('/json', async (ctx, next) => {
-  ctx.body = {
-    title: 'koa2 json'
-  }
-})
+// router.get('/', async (ctx, next) => {
+//   ctx.type = 'text/html';
+//   ctx.body = fs.createReadStream(path.resolve(__dirname, '../public/index.html'));
+// })
 
 module.exports = router

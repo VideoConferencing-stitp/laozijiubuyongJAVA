@@ -5,6 +5,7 @@ const json = require('koa-json')
 const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
+const mount = require('koa-mount');
 
 const index = require('./routes/index')
 const users = require('./routes/users')
@@ -15,11 +16,10 @@ onerror(app)
 
 // middlewares
 app.use(bodyparser({
-  enableTypes:['json', 'form', 'text']
+  enableTypes: ['json', 'form', 'text']
 }))
 app.use(json())
 app.use(logger())
-app.use(require('koa-static')(__dirname + '/public'))
 
 app.use(views(__dirname + '/views', {
   extension: 'pug'
@@ -29,6 +29,10 @@ app.use(views(__dirname + '/views', {
 app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 app.use(mysql.routes(), mysql.allowedMethods())
+
+// static
+app.use(require('koa-static')(__dirname + '/public/dist')) // 分发vue打包的主页面入口
+app.use(mount('/fill', require('koa-static')(__dirname + '/public/dist', { index: 'fill.html' }))) // 分发问卷模版
 
 // error-handling
 app.on('error', (err, ctx) => {

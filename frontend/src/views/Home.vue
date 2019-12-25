@@ -1,7 +1,5 @@
 <template>
   <div class="home">
-    <!-- <qrcode :value="valueNoError" :options="{ width: 200 }"></qrcode> -->
-    <!-- <el-input v-model="value" placeholder="输入同步映射QR"></el-input> -->
     <div class="menu">
       <el-menu default-active="1" class="el-menu-demo" mode="horizontal">
         <el-menu-item index="1">我的项目</el-menu-item>
@@ -20,20 +18,32 @@
 </template>
 <script>
 import QuestionnaireList from "../components/QuestionnaireList";
+import getQnListApi from "../api/getQnListApi";
+
 export default {
   name: "Home",
   components: {
     QuestionnaireList
   },
-  props: {},
+  created() {
+    this.loadQnList();
+  },
   computed: {
     questionnaireList() {
-      return this.$store.state.user.questionnaireList
+      return this.$store.state.user.questionnaireList;
     }
-  },  
+  },
   methods: {
     handle() {
       this.$store.commit("SET_NUMBER");
+    },
+    loadQnList() {
+      getQnListApi({ userId: "123456" }).then(res => {
+        console.log(res)
+        this.$store.commit("SET_QUESTIONNAIRE_LIST", res.qnList);
+      }).catch(e => {
+        console.error(e)
+      });
     }
   }
 };
@@ -45,6 +55,6 @@ export default {
 .controler {
   padding: 1rem;
 }
-.controler__btn-1{
+.controler__btn-1 {
 }
 </style>
