@@ -96,6 +96,66 @@ router.get('/get-qn-list', async (ctx, next) => {
     }    
 })
 
+// 获取问卷内容
+router.get('/get-qn', async (ctx, next) => {
+    let reqQue = ctx.request.query;
+    let qnId = JSON.stringify(reqQue.qnId);
+
+    // 连接数据库
+    let connection = ConnectSQL();
+    let query = ()=>{
+        return GetResult(connection, sql.GET_Q_NAME + qnId);
+    }
+    let temp = await query();
+    // 问卷号错误/已被删除/不存在
+    if (temp.length === 0){
+        ctx.body = {
+            "code": 501,
+            "msg": "不存在此问卷",
+            "data": null
+        }
+    } else {
+        // 查询成功
+        // 提取当前问卷名
+        Qname = temp[0].Qname;
+        // 提取当前问卷题目
+        query = ()=>{
+            return GetResult(connection, sql.GET_Q_LIST + qnId)
+        }
+        temp = await query();
+        let questions = new Array();
+        for (let i = 0; i < temp.length; i++){
+            // 提取当前问卷某题的选项
+            query = ()=>{
+                return GetResult(connection, sql.GET_Q_OPTIONS + temp[i].QuID)
+            }
+            let temp2 = await query();
+            let labels = new Array();
+            for (let j = 0; j < temp2.length; j++){
+                labels[j] = temp2[j].contexts;
+            }  
+            let detail = {
+                "qId": temp[i].QuID,
+                "type": temp[i].type == "单选" ? "radio" : "checkbox",
+                "title": temp[i].contexts,
+                "labels": labels
+            }
+            questions.push(detail)
+        }
+        let result = {
+            "code": 200,
+            "msg": "成功",
+            "data": {
+                "id": parseInt(qnId.split('\"')[1]),
+                "title": Qname,
+                "questions": questions
+            }
+        }
+        ctx.body = result;
+    }
+    connection.end();
+})
+
 //删除问卷
 router.post('/delete-qn', async (ctx, next) => {
 
@@ -211,7 +271,13 @@ function GetResult(connection, sqlSentence){
 
 
 
-// sql语句
+/*
+* sql语句
+*   GET_ALL: 获取问卷列表
+*   LOGIN: 获取登录信息
+*   GET_Q_NAME: 获取指定Id的问卷名字
+*   GET_Q_LIST: 获取指定问卷Id的问题列表
+*/
 let sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
     GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
@@ -220,7 +286,11 @@ let sql = {
     DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID =",
     GET_QN_DATA_FIRST:"SELECT question.contexts,qoption.qcontexts,op_num FROM question,qoption WHERE  qoption.QuID in (select QuID from question where QID=",
     GET_QN_DATA_SECNOD:") and qoption.QuID=question.QuID",
-    SUBMIT_QN:"UPDATE questionnaire.qoption SET op_num = op_num+1 WHERE remark= and QuID= "
+    SUBMIT_QN:"UPDATE questionnaire.qoption SET op_num = op_num+1 WHERE remark= and QuID= ",
+    GET_Q_NAME: "SELECT Qname FROM questionnaire_survey_system.questionnaire WHERE QID=",
+    GET_Q_LIST: "SELECT QuID,contexts,type FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID and questionnaire.QID=",
+    GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID="
+
 };
 
 module.exports = router
