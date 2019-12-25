@@ -1,17 +1,6 @@
 const router = require('koa-router')()
 const mysql = require('mysql')
 
-// 测试查表
-router.get('/search', async (ctx, next) => {
-
-    let connection = ConnectSQL();
-    let query = ()=>{
-        return GetResult(connection, sql.GET_ALL);
-    }
-    let result = await query();
-    ctx.body = result;
-})
-
 // 登录
 router.post('/login', async (ctx) => {
     reqData = ctx.request.body;
@@ -285,7 +274,71 @@ router.get('/get-qn-data', async (ctx, next) => {
             };
         }//else
     }//else
+})
 
+// 新增问卷
+router.post('/create-qn', async (ctx) => {
+
+    let qnData = ctx.request.body;
+
+    let finish_time = '2020-02-01';
+    let nowDate = new Date();
+    let release_time = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1)
+                    + '-' + nowDate.getDate() + ' ' + nowDate.getHours() + ':'
+                    + nowDate.getMinutes() + ':' + nowDate.getSeconds() + '.0';
+    let values = '(\'' + qnData.questionnaire.title + '\',' 
+                + qnData.questionnaire.questions.length + ',\'' + finish_time 
+                + '\',\'' + release_time + '\',\'' + '非定时\',\'' + qnData.userId
+                + '\',1)';
+    // 连接数据库，插入问卷
+    let connection = ConnectSQL();
+    let query = ()=>{
+        return GetResult(connection, sql.INSERT_QUESTIONNAIRE + values);
+    }
+    let temp = await query();
+    if (temp.code == 501){
+        temp.msg = "增加问卷记录失败，请重试！";
+    } else {
+
+    // 正确插入问卷后，再插入该问卷的问题
+        let qId = temp.insertId;
+        let questions = qnData.questionnaire.questions;
+        let flag = true;  // 判断是否发生错误的标记，中途一旦出错，立即修改标记并退出
+        for (let i = 0; i < questions.length & flag; i++) {
+            let type = questions[i].type == "radio" ? "单选" : "多选";
+            values = '(\'' + type + '\',\'必填\',\'' + questions[i].title + '\',' + qId + ')';
+            query = ()=>{
+                return GetResult(connection, sql.INSERT_QUESTION + values);
+            }
+            temp = await query();
+            if (temp.code == 501) {
+                temp.msg = "增加问题失败，请重试！";
+                flag = false;
+                break;
+            } else {
+
+    // 正确插入问题后，再插入该问题的选项
+                let quId = temp.insertId;
+                let labels = questions[i].labels;
+                for (let j = 0; j < labels.length; j++) {
+                    let charCode = 65;
+                    let remark = String.fromCharCode(charCode++);
+                    values = '(\'' + labels[j] + '\',' + '0,' + quId + ',\'' + remark + '\')'
+                    query = ()=>{
+                        return GetResult(connection, sql.INSERT_QOPTION + values);
+                    }
+                    temp = await query();
+                    if (temp.code == 501) {
+                        temp.msg = "增加选项失败，请重试！";
+                        flag = false;
+                        break;
+                    }
+                }
+            }
+        }
+        ctx.body = temp;
+    }
+    connection.end();
 })
 
 // 连接数据库
@@ -293,7 +346,7 @@ function ConnectSQL(){
     let connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
-        password : '981022',
+        password : '123456',
         database : 'questionnaire_survey_system'
     });
     connection.connect();
@@ -328,7 +381,9 @@ function GetResult(connection, sqlSentence){
 *   GET_QN_DATA_SECOND:获取问卷数据语句后半部分
 *   SUBMIT_QN_FIRST：向数据库插入提交的选项前半部分
 *   SUBMIT_QN_SECOND:向数据库插入提交的选项后半部分
-*   
+*   INSERT_QUESTIONNAIRE: 新增问卷记录
+*   INSERT_QUESTION: 新增问题记录
+*   INSERT_QOPTION: 新增选项记录
 */
 let sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
@@ -342,8 +397,10 @@ let sql = {
     SUBMIT_QN_SECOND:'" and QuID= ',
     GET_Q_NAME: "SELECT Qname FROM questionnaire_survey_system.questionnaire WHERE QID=",
     GET_Q_LIST: "SELECT QuID,contexts,type FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID and questionnaire.QID=",
-    GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID="
-
+    GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID=",
+    INSERT_QUESTIONNAIRE: "INSERT INTO questionnaire_survey_system.questionnaire (Qname, Qnum, deadline, release_time, release_way, AID, Qstatus) VALUES ",
+    INSERT_QUESTION: "INSERT INTO questionnaire_survey_system.question (type, remarks, contexts, QID) VALUES ",
+    INSERT_QOPTION: "INSERT INTO questionnaire_survey_system.qoption (contexts, op_num, QuID, remark) VALUES "
 };
 
 module.exports = router
