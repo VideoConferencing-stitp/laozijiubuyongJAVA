@@ -123,6 +123,63 @@ router.post('/delete-qn', async (ctx, next) => {
     }    
 })
 
+// 获取问卷统计数据
+router.get('/get-qn-data', async (ctx, next) => {
+
+    reqData=ctx.request.body;
+    qnId=JSON.stringify(reqData.qnId);
+    // 连接数据库，查询问卷列表
+    let connection = ConnectSQL();
+    let query = ()=>{
+      return GetResult(connection, sql.GET_QN_DATA_FIRST+qnId+sql.GET_QN_DATA_SECNOD);
+    }
+
+    // 先获取查询结果，再关闭数据库连接（不可颠倒）
+    let temp = await query();
+    connection.end();
+
+    // 查询失败则返回501，成功则返回目标数据
+    if (temp.code == 501){
+        temp.msg = "无法获取问卷列表，请检查网络连接！"
+        ctx.body = temp;
+    }else{
+        data={};
+        data.id=qnId;
+        //获取到的数据总长度
+        len=temp.length;
+        //标题，数据内容数组
+        chartDatas=[];
+        var cIndex=0;
+        nowTitle=temp[0].contexts;
+        chartDatas[cIndex]={}
+        chartDatas[cIndex].title=temp[0].contexts;
+        chartDatas[cIndex].data=[];
+        for(var i=0;i<len;i++)
+        {
+            if(nowTitle==temp[i].contexts)
+            {
+                chartDatas[cIndex].data.push({
+                    "value":temp[i].op_num,
+                    "name":temp[i].qcontexts
+                })
+            }
+            else{
+                cIndex++;
+                chartDatas[cIndex]={};
+                chartDatas[cIndex].title=temp[i].contexts;
+                chartDatas[cIndex].data=[];
+                nowTitle=temp[i].contexts;
+            }
+        }
+        data.chartDatas=chartDatas;
+        ctx.body = {
+            "code": 200, 
+            "msg": "数据获取成功",
+            "data":data
+        };
+    }
+})
+
 // 连接数据库
 function ConnectSQL(){
     let connection = mysql.createConnection({
@@ -160,7 +217,10 @@ let sql = {
     GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
     INSERT_QN: "INSERT INTO `questionnaire_survey_system`.`administrator` (`AID`, `telephone`, `key`) VALUES ('A2', '13322258585', '324')",
     LOGIN: "select * from administrator where telephone =",
-    DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID ="
+    DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID =",
+    GET_QN_DATA_FIRST:"SELECT question.contexts,qoption.qcontexts,op_num FROM question,qoption WHERE  qoption.QuID in (select QuID from question where QID=",
+    GET_QN_DATA_SECNOD:") and qoption.QuID=question.QuID",
+    SUBMIT_QN:"UPDATE questionnaire.qoption SET op_num = op_num+1 WHERE remark= and QuID= "
 };
 
 module.exports = router
