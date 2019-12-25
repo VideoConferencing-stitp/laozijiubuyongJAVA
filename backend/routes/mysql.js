@@ -6,14 +6,7 @@ router.get('/search', async (ctx, next) => {
 
     let connection = ConnectSQL();
     let query = ()=>{
-      return new Promise((resolve,reject)=>{
-          connection.query(sql.GET_ALL,(err,data) => {
-              if(err){
-                  resolve({message:err.message})
-              }
-              resolve(data);
-          })
-      })
+        return GetResult(connection, sql.GET_ALL);
     }
     let result = await query();
     ctx.body = result;
@@ -28,14 +21,7 @@ router.post('/login', async (ctx) => {
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
     let query = ()=>{
-    return new Promise((resolve,reject)=>{
-        connection.query(sql.LOGIN + account,(err,data) => {
-            if(err){
-                resolve({message:err.message})
-            }
-            resolve(data);
-        })
-    })
+        return GetResult(connection, sql.LOGIN + account);
     }
 
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
@@ -72,18 +58,7 @@ router.get('/get-qn-list', async (ctx, next) => {
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
     let query = ()=>{
-      return new Promise((resolve,reject)=>{
-          connection.query(sql.GET_ALL5,(err,data) => {
-              if(err){
-                  resolve({
-                    "code": 501,
-                    "msg": "无法获取问卷列表，请检查网络连接！",
-                    "data": null
-                })
-              }
-              resolve(data);
-          })
-      })
+      return GetResult(connection, sql.GET_ALL);
     }
 
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
@@ -92,6 +67,7 @@ router.get('/get-qn-list', async (ctx, next) => {
 
     // 查询失败则返回501，成功则返回目标数据
     if (temp.code == 501){
+        temp.msg = "无法获取问卷列表，请检查网络连接！"
         ctx.body = temp;
     } else {
         let qnList = [];
@@ -132,8 +108,27 @@ function ConnectSQL(){
     return connection;
 }
 
+// 获取数据库执行结果
+function GetResult(connection, sqlSentence){
+    return new Promise((resolve,reject)=>{
+        connection.query(sqlSentence,(err,data) => {
+            if(err){
+                resolve( resolve({
+                    "code": 501,
+                    "msg": "",
+                    "data": null
+                }))
+            }
+            resolve(data);
+        })
+    })
+}
+
+
+
+
 // sql语句
-var sql = {
+let sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
     GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
     INSERT_QN: "INSERT INTO `questionnaire_survey_system`.`administrator` (`AID`, `telephone`, `key`) VALUES ('A2', '13322258585', '324')",
