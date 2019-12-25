@@ -4,6 +4,7 @@ import Login from './views/Login'
 import Home from './views/Home'
 import Visualize from './views/Visualize'
 import Edit from './views/Edit'
+import Fill from './fill/Fill'
 import Preview from './views/Preview'
 import Page404 from './views/Page404'
 
@@ -17,6 +18,7 @@ const routes = [
   { path: '/visualize', component: Visualize },
   { path: '/preview', component: Preview },
   { path: '/edit', component: Edit },
+  { path: '/fill', component: Fill },
   { path: '*', component: Page404 }
 ]
 

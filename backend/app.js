@@ -29,8 +29,8 @@ app.use(index.routes(), index.allowedMethods())
 app.use(users.routes(), users.allowedMethods())
 
 // static
-app.use(require('koa-static')(__dirname + '/public/main')) // 分发vue打包的主页面入口
-app.use(mount('/fill', require('koa-static')(__dirname + '/public/fill-qn'))) // 分发问卷模版
+app.use(require('koa-static')(__dirname + '/public/dist')) // 分发vue打包的主页面入口
+app.use(mount('/fill', require('koa-static')(__dirname + '/public/dist', { index: 'fill.html' }))) // 分发问卷模版
 
 // error-handling
 app.on('error', (err, ctx) => {
