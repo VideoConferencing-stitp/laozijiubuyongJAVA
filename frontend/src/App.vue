@@ -27,6 +27,12 @@ export default {
   box-sizing: border-box;
 }
 
+@media screen and (max-width: 800px) {
+  #app {
+    padding: 0 2rem;
+  } 
+}
+
 .flow-enter-active {
   transition: all 0.5s ease;
 }
