@@ -1,17 +1,6 @@
 const router = require('koa-router')()
 const mysql = require('mysql')
 
-// 测试查表
-router.get('/search', async (ctx, next) => {
-
-    let connection = ConnectSQL();
-    let query = ()=>{
-        return GetResult(connection, sql.GET_ALL);
-    }
-    let result = await query();
-    ctx.body = result;
-})
-
 // 登录
 router.post('/login', async (ctx) => {
     reqData = ctx.request.body;
@@ -163,18 +152,22 @@ router.post('/delete-qn', async (ctx, next) => {
     let connection = ConnectSQL();
     reqData=ctx.request.body;
     deQnId=JSON.stringify(reqData.qnId);
-    console.log(reqData.qnId);
     let query = ()=>{
       return GetResult(connection,sql.DELETE_QN+deQnId)
     }
-
     // 先获取查询结果，再关闭数据库连接（不可颠倒）
     let temp = await query();
     connection.end();
 
+    console.log(temp);
     // 查询失败则返回501，成功则返回200,成功
     if (temp.code == 501){
         ctx.body = temp;
+    } else if(temp.affectedRows==0){
+        ctx.body = {
+            "code": 501, 
+            "msg": "不存在此问卷"
+        };
     } else {
         ctx.body = {
             "code": 200, 
@@ -183,11 +176,47 @@ router.post('/delete-qn', async (ctx, next) => {
     }    
 })
 
+//提交答案
+router.post('/submit-qn' , async (ctx,next) => {
+    reqData=ctx.request.body;
+    answerList=reqData.answers;
+    let connection = ConnectSQL();
+    //监测是否全部插入成功
+    var flag=true;
+    var len=answerList.length;
+    for(var i=0;i<len;i++){
+        qId=answerList[i].qId;
+        tempCheck=answerList[i].checkList;
+        for(var j=0;j<tempCheck.length;j++){
+            let query = ()=>{
+                return GetResult(connection, sql.SUBMIT_QN_FIRST+tempCheck[j]+sql.SUBMIT_QN_SECOND+qId);
+            }
+            let temp = await query();
+            if(temp.code==501){
+                flag=false;
+                break;
+            }//if
+        }//for
+    }//for
+    if (flag){
+        ctx.body = {
+            "code": 200, 
+            "msg": "插入成功"
+        };
+    }else{
+        ctx.body = {
+            "code": 501, 
+            "msg": "插入失败"
+        };
+    }
+})
+
 // 获取问卷统计数据
 router.get('/get-qn-data', async (ctx, next) => {
 
-    reqData=ctx.request.body;
+    reqData=ctx.request.query;
     qnId=JSON.stringify(reqData.qnId);
+    console.log(qnId);
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
     let query = ()=>{
@@ -200,44 +229,117 @@ router.get('/get-qn-data', async (ctx, next) => {
 
     // 查询失败则返回501，成功则返回目标数据
     if (temp.code == 501){
-        temp.msg = "无法获取问卷列表，请检查网络连接！"
+        temp.msg = "无法统计问卷数据，请检查网络连接！"
         ctx.body = temp;
     }else{
-        data={};
-        data.id=qnId;
-        //获取到的数据总长度
-        len=temp.length;
-        //标题，数据内容数组
-        chartDatas=[];
-        var cIndex=0;
-        nowTitle=temp[0].contexts;
-        chartDatas[cIndex]={}
-        chartDatas[cIndex].title=temp[0].contexts;
-        chartDatas[cIndex].data=[];
-        for(var i=0;i<len;i++)
-        {
-            if(nowTitle==temp[i].contexts)
-            {
-                chartDatas[cIndex].data.push({
-                    "value":temp[i].op_num,
-                    "name":temp[i].qcontexts
-                })
+        if(temp.length!=0){
+            data={};
+            qnId=qnId.substr(1,qnId.length-2);
+            data.id=qnId;
+            //获取到的数据总长度
+            len=temp.length;
+            //标题，数据内容数组
+            chartDatas=[];
+            var cIndex=0;
+            nowTitle=temp[0].contexts;
+            chartDatas[cIndex]={}
+            chartDatas[cIndex].title=temp[0].contexts;
+            chartDatas[cIndex].data=[];
+            for(var i=0;i<len;i++){
+                if(nowTitle==temp[i].contexts){
+                    chartDatas[cIndex].data.push({
+                        "value":temp[i].op_num,
+                        "name":temp[i].qcontexts
+                    })
+                }//if
+                else{
+                    cIndex++;
+                    chartDatas[cIndex]={};
+                    chartDatas[cIndex].title=temp[i].contexts;
+                    chartDatas[cIndex].data=[];
+                    nowTitle=temp[i].contexts;
+                }//else
+            }//for
+            data.chartDatas=chartDatas;
+            ctx.body = {
+                "code": 200, 
+                "msg": "数据获取成功",
+                "data":data
+            };
+        }//if
+        else{
+            ctx.body = {
+                "code": 501, 
+                "msg": "没有此问卷"
+            };
+        }//else
+    }//else
+
+})
+
+// 新增问卷
+router.post('/create-qn', async (ctx) => {
+
+    let qnData = ctx.request.body;
+
+    let finish_time = '2020-02-01';
+    let nowDate = new Date();
+    let release_time = nowDate.getFullYear() + '-' + (nowDate.getMonth() + 1)
+                    + '-' + nowDate.getDate() + ' ' + nowDate.getHours() + ':'
+                    + nowDate.getMinutes() + ':' + nowDate.getSeconds() + '.0';
+    let values = '(\'' + qnData.questionnaire.title + '\',' 
+                + qnData.questionnaire.questions.length + ',\'' + finish_time 
+                + '\',\'' + release_time + '\',\'' + '非定时\',\'' + qnData.userId
+                + '\',1)';
+    // 连接数据库，插入问卷
+    let connection = ConnectSQL();
+    let query = ()=>{
+        return GetResult(connection, sql.INSERT_QUESTIONNAIRE + values);
+    }
+    let temp = await query();
+    if (temp.code == 501){
+        temp.msg = "增加问卷记录失败，请重试！";
+    } else {
+
+    // 正确插入问卷后，再插入该问卷的问题
+        let qId = temp.insertId;
+        let questions = qnData.questionnaire.questions;
+        let flag = true;  // 判断是否发生错误的标记，中途一旦出错，立即修改标记并退出
+        for (let i = 0; i < questions.length & flag; i++) {
+            let type = questions[i].type == "radio" ? "单选" : "多选";
+            values = '(\'' + type + '\',\'必填\',\'' + questions[i].title + '\',' + qId + ')';
+            query = ()=>{
+                return GetResult(connection, sql.INSERT_QUESTION + values);
             }
-            else{
-                cIndex++;
-                chartDatas[cIndex]={};
-                chartDatas[cIndex].title=temp[i].contexts;
-                chartDatas[cIndex].data=[];
-                nowTitle=temp[i].contexts;
+            temp = await query();
+            if (temp.code == 501) {
+                temp.msg = "增加问题失败，请重试！";
+                flag = false;
+                break;
+            } else {
+
+    // 正确插入问题后，再插入该问题的选项
+                let quId = temp.insertId;
+                let labels = questions[i].labels;
+                for (let j = 0; j < labels.length; j++) {
+                    let charCode = 65;
+                    let remark = String.fromCharCode(charCode++);
+                    values = '(\'' + labels[j] + '\',' + '0,' + quId + ',\'' + remark + '\')'
+                    query = ()=>{
+                        return GetResult(connection, sql.INSERT_QOPTION + values);
+                    }
+                    temp = await query();
+                    if (temp.code == 501) {
+                        temp.msg = "增加选项失败，请重试！";
+                        flag = false;
+                        break;
+                    }
+                }
             }
         }
-        data.chartDatas=chartDatas;
-        ctx.body = {
-            "code": 200, 
-            "msg": "数据获取成功",
-            "data":data
-        };
+        ctx.body = temp;
     }
+    connection.end();
 })
 
 // 连接数据库
@@ -245,7 +347,7 @@ function ConnectSQL(){
     let connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
-        password : '263785czx',
+        password : '123456',
         database : 'questionnaire_survey_system'
     });
     connection.connect();
@@ -269,14 +371,20 @@ function GetResult(connection, sqlSentence){
 }
 
 
-
-
 /*
 * sql语句
 *   GET_ALL: 获取问卷列表
 *   LOGIN: 获取登录信息
 *   GET_Q_NAME: 获取指定Id的问卷名字
 *   GET_Q_LIST: 获取指定问卷Id的问题列表
+*   DELETE_QN:删除问卷
+*   GET_QN_DATA_FIRST:获取问卷数据语句前半部分
+*   GET_QN_DATA_SECOND:获取问卷数据语句后半部分
+*   SUBMIT_QN_FIRST：向数据库插入提交的选项前半部分
+*   SUBMIT_QN_SECOND:向数据库插入提交的选项后半部分
+*   INSERT_QUESTIONNAIRE: 新增问卷记录
+*   INSERT_QUESTION: 新增问题记录
+*   INSERT_QOPTION: 新增选项记录
 */
 let sql = {
     GET_ALL: 'SELECT * FROM questionnaire', 
@@ -286,11 +394,14 @@ let sql = {
     DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID =",
     GET_QN_DATA_FIRST:"SELECT question.contexts,qoption.qcontexts,op_num FROM question,qoption WHERE  qoption.QuID in (select QuID from question where QID=",
     GET_QN_DATA_SECNOD:") and qoption.QuID=question.QuID",
-    SUBMIT_QN:"UPDATE questionnaire.qoption SET op_num = op_num+1 WHERE remark= and QuID= ",
+    SUBMIT_QN_FIRST:'UPDATE questionnaire_survey_system.qoption SET op_num = op_num+1 WHERE remark="',
+    SUBMIT_QN_SECOND:'" and QuID= ',
     GET_Q_NAME: "SELECT Qname FROM questionnaire_survey_system.questionnaire WHERE QID=",
     GET_Q_LIST: "SELECT QuID,contexts,type FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID and questionnaire.QID=",
-    GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID="
-
+    GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID=",
+    INSERT_QUESTIONNAIRE: "INSERT INTO questionnaire_survey_system.questionnaire (Qname, Qnum, deadline, release_time, release_way, AID, Qstatus) VALUES ",
+    INSERT_QUESTION: "INSERT INTO questionnaire_survey_system.question (type, remarks, contexts, QID) VALUES ",
+    INSERT_QOPTION: "INSERT INTO questionnaire_survey_system.qoption (contexts, op_num, QuID, remark) VALUES "
 };
 
 module.exports = router
