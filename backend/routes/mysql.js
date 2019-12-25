@@ -126,7 +126,7 @@ router.post('/delete-qn', async (ctx, next) => {
 // 获取问卷统计数据
 router.get('/get-qn-data', async (ctx, next) => {
 
-    reqData=ctx.request.body;
+    reqData=ctx.request.query;
     qnId=JSON.stringify(reqData.qnId);
     // 连接数据库，查询问卷列表
     let connection = ConnectSQL();
@@ -140,7 +140,7 @@ router.get('/get-qn-data', async (ctx, next) => {
 
     // 查询失败则返回501，成功则返回目标数据
     if (temp.code == 501){
-        temp.msg = "无法获取问卷列表，请检查网络连接！"
+        temp.msg = "无法统计问卷数据，请检查网络连接！"
         ctx.body = temp;
     }else{
         data={};
