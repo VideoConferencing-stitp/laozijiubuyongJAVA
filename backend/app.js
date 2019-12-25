@@ -8,7 +8,11 @@ const logger = require('koa-logger')
 const mount = require('koa-mount');
 
 const index = require('./routes/index')
+<<<<<<< Updated upstream
 const users = require('./routes/users')
+=======
+const mysql = require('./routes/mysql')
+>>>>>>> Stashed changes
 
 // error handler
 onerror(app)
@@ -26,7 +30,7 @@ app.use(views(__dirname + '/views', {
 
 // routes
 app.use(index.routes(), index.allowedMethods())
-app.use(users.routes(), users.allowedMethods())
+app.use(mysql.routes(), mysql.allowedMethods())
 
 // static
 app.use(require('koa-static')(__dirname + '/public/dist')) // 分发vue打包的主页面入口
