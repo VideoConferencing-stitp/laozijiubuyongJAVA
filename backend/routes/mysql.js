@@ -187,6 +187,41 @@ router.post('/delete-qn', async (ctx, next) => {
     }    
 })
 
+//提交答案
+router.post('/submit-qn' , async (ctx,next) => {
+    reqData=ctx.request.body;
+    answerList=reqData.answers;
+    let connection = ConnectSQL();
+    //监测是否全部插入成功
+    var flag=true;
+    var len=answerList.length;
+    for(var i=0;i<len;i++){
+        qId=answerList[i].qId;
+        tempCheck=answerList[i].checkList;
+        for(var j=0;j<tempCheck.length;j++){
+            let query = ()=>{
+                return GetResult(connection, sql.SUBMIT_QN_FIRST+tempCheck[j]+sql.SUBMIT_QN_SECOND+qId);
+            }
+            let temp = await query();
+            if(temp.code==501){
+                flag=false;
+                break;
+            }//if
+        }//for
+    }//for
+    if (flag){
+        ctx.body = {
+            "code": 200, 
+            "msg": "插入成功"
+        };
+    }else{
+        ctx.body = {
+            "code": 501, 
+            "msg": "插入失败"
+        };
+    }
+})
+
 // 获取问卷统计数据
 router.get('/get-qn-data', async (ctx, next) => {
 
@@ -208,8 +243,7 @@ router.get('/get-qn-data', async (ctx, next) => {
         temp.msg = "无法统计问卷数据，请检查网络连接！"
         ctx.body = temp;
     }else{
-        if(temp.length!=0)
-        {
+        if(temp.length!=0){
             data={};
             qnId=qnId.substr(1,qnId.length-2);
             data.id=qnId;
@@ -222,10 +256,8 @@ router.get('/get-qn-data', async (ctx, next) => {
             chartDatas[cIndex]={}
             chartDatas[cIndex].title=temp[0].contexts;
             chartDatas[cIndex].data=[];
-            for(var i=0;i<len;i++)
-            {
-                if(nowTitle==temp[i].contexts)
-                {
+            for(var i=0;i<len;i++){
+                if(nowTitle==temp[i].contexts){
                     chartDatas[cIndex].data.push({
                         "value":temp[i].op_num,
                         "name":temp[i].qcontexts
@@ -294,7 +326,8 @@ function GetResult(connection, sqlSentence){
 *   DELETE_QN:删除问卷
 *   GET_QN_DATA_FIRST:获取问卷数据语句前半部分
 *   GET_QN_DATA_SECOND:获取问卷数据语句后半部分
-*   SUBMIT_QN：向数据库插入提交的选项
+*   SUBMIT_QN_FIRST：向数据库插入提交的选项前半部分
+*   SUBMIT_QN_SECOND:向数据库插入提交的选项后半部分
 *   
 */
 let sql = {
@@ -305,7 +338,8 @@ let sql = {
     DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID =",
     GET_QN_DATA_FIRST:"SELECT question.contexts,qoption.qcontexts,op_num FROM question,qoption WHERE  qoption.QuID in (select QuID from question where QID=",
     GET_QN_DATA_SECNOD:") and qoption.QuID=question.QuID",
-    SUBMIT_QN:"UPDATE questionnaire.qoption SET op_num = op_num+1 WHERE remark= and QuID= ",
+    SUBMIT_QN_FIRST:'UPDATE questionnaire_survey_system.qoption SET op_num = op_num+1 WHERE remark="',
+    SUBMIT_QN_SECOND:'" and QuID= ',
     GET_Q_NAME: "SELECT Qname FROM questionnaire_survey_system.questionnaire WHERE QID=",
     GET_Q_LIST: "SELECT QuID,contexts,type FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID and questionnaire.QID=",
     GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID="
