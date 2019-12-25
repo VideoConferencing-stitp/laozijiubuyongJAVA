@@ -320,8 +320,7 @@ router.post('/create-qn', async (ctx) => {
     // 正确插入问题后，再插入该问题的选项
                 let quId = temp.insertId;
                 let labels = questions[i].labels;
-                for (let j = 0; j < labels.length; j++) {
-                    let charCode = 65;
+                for (let j = 0, charCode = 65; j < labels.length; j++) {
                     let remark = String.fromCharCode(charCode++);
                     values = '(\'' + labels[j] + '\',' + '0,' + quId + ',\'' + remark + '\')'
                     query = ()=>{
@@ -346,7 +345,7 @@ function ConnectSQL(){
     let connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
-        password : '123456',
+        password : '263785czx',
         database : 'questionnaire_survey_system'
     });
     connection.connect();
@@ -400,7 +399,7 @@ let sql = {
     GET_Q_OPTIONS: "SELECT OID,qoption.contexts FROM questionnaire_survey_system.question,qoption where question.QuID=qoption.QuID and question.QuID=",
     INSERT_QUESTIONNAIRE: "INSERT INTO questionnaire_survey_system.questionnaire (Qname, Qnum, deadline, release_time, release_way, AID, Qstatus) VALUES ",
     INSERT_QUESTION: "INSERT INTO questionnaire_survey_system.question (type, remarks, contexts, QID) VALUES ",
-    INSERT_QOPTION: "INSERT INTO questionnaire_survey_system.qoption (contexts, op_num, QuID, remark) VALUES "
+    INSERT_QOPTION: "INSERT INTO questionnaire_survey_system.qoption (qcontexts, op_num, QuID, remark) VALUES "
 };
 
 module.exports = router
