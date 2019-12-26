@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const http = axios.create({
-  baseURL: 'https://563ca27c-adb5-46ab-8799-90be2c9cd2f7.mock.pstmn.io/',
+  baseURL: 'http://yapi.demo.qunar.com/mock/63674/',
 });
 
 // https://github.com/axios/axios#interceptors

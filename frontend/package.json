@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
+    "serve:fill": "vue-cli-service serve src/fill/main.js",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
