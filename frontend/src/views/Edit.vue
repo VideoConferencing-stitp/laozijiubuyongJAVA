@@ -129,7 +129,7 @@
     </div>
 
     <!-- 发布成功的信息弹层 -->
-    <el-dialog title="分享问卷" :visible.sync="dialogVisible" width="25rem" @close="dialogClose">
+    <el-dialog title="分享问卷" :visible.sync="dialogVisible" width="25rem" @close="$router.replace('/home')">
       <div class="qr-wrapper">
         <div class="cell">
           <qrcode :value="releaseInfo.url" :options="{ width: 200 }"></qrcode>
@@ -286,10 +286,6 @@ export default {
       this.$store.commit("SET_QUESTIONNAIRE", this.questionnaire);
       this.$router.push("/preview");
     },
-
-    dialogClose() {
-      this.$router.replace("/home");
-    }
   }
 };
 </script>

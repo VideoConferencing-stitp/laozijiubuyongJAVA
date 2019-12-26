@@ -45,26 +45,23 @@
         </div>
       </div>
     </div>
-    <el-button class="submmit__button" type="primary" size="medium" @click="submmit">提交</el-button>
   </div>
 </template>
 <script>
 import getQnApi from "../api/getQnApi";
 import submitQnApi from "../api/submitQnApi";
 
-const num2UpperAlpha = num => String.fromCharCode(65 + num);
-
 export default {
   name: "Fill",
   data() {
     return {
-      qnId: window.location.hash.split("=")[1],
+      qnId: window.location.search.split("=")[1],
       questionnaire: null
     };
   },
   created() {
-    this.loadQn();
-    console.log(this.qnId);
+    // this.loadQn();
+    console.log(this.qnId)
   },
   methods: {
     async loadQn() {
@@ -79,55 +76,8 @@ export default {
         });
       }
     },
-    mergeQuestion() {
-      let data = {
-        qnId: "",
-        answers: []
-      };
-
-      const { id, questions } = this.questionnaire;
-      data.qnId = id;
-      questions.forEach(question => {
-        const { type, labels, qId, radio, checkList } = question;
-        let answer = {
-          qId,
-          checkList: []
-        };
-        if (type === "radio") {
-          if (labels.indexOf(radio) !== -1) {
-            answer.checkList.push(num2UpperAlpha(labels.indexOf(radio)));
-          }
-        } else {
-          checkList.forEach(radio => {
-            if (labels.indexOf(radio) !== -1) {
-              answer.checkList.push(num2UpperAlpha(labels.indexOf(radio)));
-            }
-          });
-        }
-        data.answers.push(answer);
-      });
-
-      return data
-    },
     async submmit() {
-      const questionnaire = this.mergeQuestion()
-      try {
-        const res = await submitQnApi(questionnaire);
-        const { code, msg } = res;
-        if(code === 200) {
-          this.$message({
-            type: "success",
-            message: msg
-          })
-        } else {
-          this.$message({
-            type: "error",
-            message: msg
-          })
-        }
-      } catch (e) {
-        console.error(e)
-      }
+      submitQnApi();
     }
   }
 };
@@ -179,11 +129,5 @@ export default {
 .el-checkbox {
   display: block;
   padding: 0.5em;
-}
-
-.submmit__button {
-  display: block;
-  width: 15rem;
-  margin: 0 auto;
 }
 </style>

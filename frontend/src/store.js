@@ -11,7 +11,7 @@ export default new Vuex.Store({
     },
     currentQnId: '', // 最近点击的问卷Id
     questionnaire: null, // 当前预览的问卷
-    loading: false
+    loading: false // 全局 loading
   },
   mutations: {
     SET_USER_ID(state, id) {
@@ -32,8 +32,5 @@ export default new Vuex.Store({
     SET_LOADING(state, value) {
       state.loading = value
     }
-  },
-  actions: {
-
   }
 })
