@@ -247,7 +247,7 @@ router.get('/get-qn-data', async (ctx, next) => {
             len = temp.length;
             //标题，数据内容数组
             chartDatas = [];
-            let cIndex = 0;
+            var cIndex = 0;
             nowTitle = temp[0].contexts;
             chartDatas[cIndex] = {}
             chartDatas[cIndex].title = temp[0].contexts;
@@ -264,6 +264,10 @@ router.get('/get-qn-data', async (ctx, next) => {
                     chartDatas[cIndex] = {};
                     chartDatas[cIndex].title = temp[i].contexts;
                     chartDatas[cIndex].data = [];
+                    chartDatas[cIndex].data.push({
+                        "value":temp[i].op_num,
+                        "name":temp[i].qcontexts
+                    })
                     nowTitle=temp[i].contexts;
                 }//else
             }//for
