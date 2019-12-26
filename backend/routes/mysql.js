@@ -364,7 +364,7 @@ router.post('/create-qn', async (ctx) => {
     if (reslut.code == 200) {
         reslut.data.url = "http://139.180.145.219:54188/fill?qnId=" + qId;        
     } else {
-        reslut.data.url = "http://139.180.145.219:54188"
+        reslut.data = null;
     }
     ctx.body = reslut;
 })
