@@ -59,10 +59,6 @@ export default {
       questionnaire: null
     };
   },
-  created() {
-    // this.loadQn();
-    console.log(this.qnId)
-  },
   methods: {
     async loadQn() {
       const res = await getQnApi({ qnId: this.qnId });

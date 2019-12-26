@@ -49,7 +49,6 @@ export default {
       try {
         const { userId } = this.$store.state.user;
         const res = await getQnListApi({ userId });
-        console.log(res);
         this.$store.commit("SET_QUESTIONNAIRE_LIST", res.qnList);
       } catch (e) {
         console.error(e);

@@ -37,7 +37,6 @@ export default {
   },
   methods: {
     submitForm(formName) {
-      console.log(this.form)
       this.$refs[formName].validate(async valid => {
         if (valid) {
           // 表单本地校验成功
@@ -46,7 +45,6 @@ export default {
             this.form.password = this.form.password+''
             const res = await loginApi(this.form);
             const { code, msg, data } = res;
-            console.log(res)
             if (code === 200) {
               this.$store.commit("SET_USER_ID", data.userId);
               this.$message({ type: "success", message: msg });

@@ -64,7 +64,6 @@ export default {
   },
   created() {
     this.loadQn();
-    console.log(this.qnId);
   },
   methods: {
     async loadQn() {
