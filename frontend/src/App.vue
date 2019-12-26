@@ -24,7 +24,7 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding: 0 10rem;
+  padding: 0 1rem;
   min-height: 100vh;
 }
 * {
@@ -43,7 +43,7 @@ body {
 
 @media screen and (max-width: 800px) {
   #app {
-    padding: 0 2rem;
+    padding: 0 1rem;
   }
 }
 
