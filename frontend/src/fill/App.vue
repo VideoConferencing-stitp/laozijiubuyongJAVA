@@ -34,7 +34,7 @@ export default {
 
 @media screen and (max-width: 800px) {
   #app {
-    padding: 0 2rem;
+    padding: 0 1rem;
   } 
 }
 
