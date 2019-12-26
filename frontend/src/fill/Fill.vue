@@ -58,24 +58,30 @@ export default {
   name: "Fill",
   data() {
     return {
-      qnId: window.location.hash.split("=")[1],
+      qnId: '',
       questionnaire: null
     };
   },
   created() {
+    this.qnId = this.$route.query['qnId']
+    console.log(this.qnId);
     this.loadQn();
   },
   methods: {
     async loadQn() {
-      const res = await getQnApi({ qnId: this.qnId });
-      const { code, msg, data } = res;
-      if (code === 200) {
-        this.questionnaire = data;
-      } else {
-        this.$message({
-          type: "error",
-          message: msg
-        });
+      try {
+        const res = await getQnApi({ qnId: this.qnId });
+        const { code, msg, data } = res;
+        if (code === 200) {
+          this.questionnaire = data;
+        } else {
+          this.$message({
+            type: "error",
+            message: msg
+          });
+        }
+      } catch (e) {
+        console.error(e);
       }
     },
     mergeQuestion() {
@@ -106,26 +112,26 @@ export default {
         data.answers.push(answer);
       });
 
-      return data
+      return data;
     },
     async submmit() {
-      const questionnaire = this.mergeQuestion()
+      const questionnaire = this.mergeQuestion();
       try {
         const res = await submitQnApi(questionnaire);
         const { code, msg } = res;
-        if(code === 200) {
+        if (code === 200) {
           this.$message({
             type: "success",
             message: msg
-          })
+          });
         } else {
           this.$message({
             type: "error",
             message: msg
-          })
+          });
         }
       } catch (e) {
-        console.error(e)
+        console.error(e);
       }
     }
   }
