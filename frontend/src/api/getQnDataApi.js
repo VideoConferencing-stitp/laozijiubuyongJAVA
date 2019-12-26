@@ -1,5 +1,5 @@
 import http from '../lib/http'
 
-export default function getQnListApi(params) {
+export default function getQnDataApi(params) {
   return http.get('/get-qn-data', { params })
 }

@@ -11,23 +11,12 @@
           ref="inputTitleDOM"
           v-if="titleEditing"
           v-model="questionnaire.title"
+          class="el-input__inner"
           :placeholder="questionnaire.title"
           @blur="titleEditing = false"
           @keyup.enter.native="titleEditing = false"
         ></el-input>
         <h1 v-else @click="handleTitleClick">{{questionnaire.title}}</h1>
-      </div>
-      <!-- 问卷描述 -->
-      <div class="QN__description">
-        <el-input
-          ref="inputSubtitleDOM"
-          v-if="subtitleEditing"
-          v-model="questionnaire.description"
-          :placeholder="questionnaire.description"
-          @blur="subtitleEditing = false"
-          @keyup.enter.native="subtitleEditing = false"
-        ></el-input>
-        <p v-else @click="handleSubtitleClick">{{questionnaire.description}}</p>
       </div>
     </div>
     <!-- 问卷内容 -->
@@ -55,8 +44,14 @@
         <p v-else @click="handleQuestionTitleClick(`${i}`, `title${i}`)">{{question.title}}</p>
         <!-- 单选 -->
         <div v-if="question.type === 'radio'">
-          <el-radio-group v-model="question.radio" class="el-radio-group">
-            <div v-for="(label, j) of question.labels" :key="j">
+          <el-radio-group class="el-radio-group" v-model="question.radio">
+            <div
+              v-for="(label, j) of question.labels"
+              :key="j"
+              class="lable-wrapper"
+              @mouseenter="hoverLabel = true; activeLableIndex = `${i}${j}`"
+              @mouseleave="hoverLabel = false"
+            >
               <el-input
                 :ref="`DOM${i}${j}`"
                 v-if="radioEditing && currentRadioIndex === `${i}${j}`"
@@ -71,13 +66,23 @@
                 :label="label"
                 @click.native="handleRadioClick(`${i}${j}`, `DOM${i}${j}`)"
               >{{ label }}</el-radio>
+              <span v-show="hoverLabel && activeLableIndex === `${i}${j}`" class="label-operation">
+                <i class="el-icon-remove remove-label-icon" @click="removeLable(i, j)"></i>
+                <i class="el-icon-circle-plus add-label-icon" @click="addLable(i, j)"></i>
+              </span>
             </div>
           </el-radio-group>
         </div>
         <!-- 多选 -->
         <div v-else-if="question.type === 'checkbox'">
           <el-checkbox-group v-model="question.checkList">
-            <div v-for="(label, j) of question.labels" :key="j">
+            <div
+              v-for="(label, j) of question.labels"
+              :key="j"
+              class="lable-wrapper"
+              @mouseenter="hoverLabel = true; activeLableIndex = `${i}${j}`"
+              @mouseleave="hoverLabel = false"
+            >
               <el-input
                 :ref="`DOM${i}${j}`"
                 v-if="checkboxEditing && currentCheckboxIndex === `${i}${j}`"
@@ -92,13 +97,17 @@
                 :label="label"
                 @click.native="handleCheckboxClick(`${i}${j}`, `DOM${i}${j}`)"
               ></el-checkbox>
+              <span v-show="hoverLabel && activeLableIndex === `${i}${j}`" class="label-operation">
+                <i class="el-icon-remove remove-label-icon" @click="removeLable(i, j)"></i>
+                <i class="el-icon-circle-plus add-label-icon" @click="addLable(i, j)"></i>
+              </span>
             </div>
           </el-checkbox-group>
         </div>
         <!-- 填空 -->
-        <div v-else-if="question.type === 'texteare'">
+        <!-- <div v-else-if="question.type === 'texteare'">
           <el-input v-model="question.value">texteare</el-input>
-        </div>
+        </div>-->
       </div>
     </div>
     <!-- 操作 -->
@@ -111,7 +120,6 @@
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="radio">单选题</el-dropdown-item>
           <el-dropdown-item command="checkbox">多选题</el-dropdown-item>
-          <el-dropdown-item command="texteare">填空题</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <el-button-group>
@@ -119,6 +127,18 @@
         <el-button class="release-button" type="primary" @click="release">发布</el-button>
       </el-button-group>
     </div>
+
+    <!-- 发布成功的信息弹层 -->
+    <el-dialog title="分享问卷" :visible.sync="dialogVisible" width="25rem" @close="$router.replace('/home')">
+      <div class="qr-wrapper">
+        <div class="cell">
+          <qrcode :value="releaseInfo.url" :options="{ width: 200 }"></qrcode>
+        </div>
+        <div class="cell">
+          <a :href="releaseInfo.url">{{releaseInfo.url}}</a>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -128,15 +148,15 @@ const getTemplate = function(type) {
   const template = {
     radio: {
       type: "radio", // 单选
-      title: "这他吗的是个单选题？",
+      title: "你可以添加单选题？",
       radio: "",
-      labels: ["10-19", "20-22", "35+"]
+      labels: ["选项-1", "选项-2", "选项-3"]
     },
     checkbox: {
       type: "checkbox", // 多选
-      title: "这他吗的不是个多选题？",
+      title: "你也可以添加多选题？",
       checkList: [],
-      labels: ["A", "B", "C"]
+      labels: ["选项-1", "选项-2", "选项-3"]
     },
     texteare: {
       type: "texteare", //填空
@@ -146,6 +166,7 @@ const getTemplate = function(type) {
   };
   return template[type];
 };
+import createQnApi from "../api/createQnApi";
 export default {
   components: {},
   name: "Edit",
@@ -158,26 +179,25 @@ export default {
       checkboxEditing: false,
       questionTitleEditing: false,
       hoverQuestion: false,
+      hoverLabel: false,
       currentRadioIndex: "",
       currentCheckboxIndex: "",
       currentTitleIndex: "",
       currentQuestionTitleIndex: "",
       activeQuestionIndex: 0,
+      activeLableIndex: "",
 
-      questionnaire: {
-        title: "🎉🎉这里是踏🐎个标题",
-        description:
-          "你看这个碗他又大又圆，你看这个面他又长又宽你看这个碗他又大又圆，你看这个面他又长又宽",
-        questions: [
-          getTemplate("radio"),
-          getTemplate("checkbox"),
-          getTemplate("texteare")
-        ]
+      questionnaire: this.$store.state.questionnaire || {
+        title: "这是一个正常的标题",
+        questions: [getTemplate("radio"), getTemplate("checkbox")]
+      },
+
+      dialogVisible: false,
+
+      releaseInfo: {
+        url: ""
       }
     };
-  },
-  mounted() {
-    console.log(getTemplate("radio") === getTemplate("radio"));
   },
   methods: {
     handleTitleClick() {
@@ -220,27 +240,60 @@ export default {
       );
     },
 
+    addLable(i, j) {
+      this.questionnaire.questions[i].labels.splice(j + 1, 0, "新增选项");
+    },
+    removeLable(i, j) {
+      this.questionnaire.questions[i].labels.splice(j, 1);
+    },
+
     addQuestion(command) {
       this.questionnaire.questions.push(getTemplate(command));
     },
 
-    release() {
-
-      // 发布成功的逻辑
-      this.$message({
-        type: "success",
-        message: "发布成功"
-      });
+    async release() {
+      try {
+        const userId = this.$store.state.user.userId;
+        const res = await createQnApi({
+          questionnaire: this.questionnaire,
+          userId
+        });
+        const { code, msg, data } = res;
+        // // 发布成功的逻辑
+        if (code === 200) {
+          this.releaseInfo.url = data.url;
+          this.dialogVisible = true;
+          this.$message({
+            type: "success",
+            message: msg
+          });
+        } else {
+          this.$message({
+            type: "error",
+            message: msg
+          });
+        }
+      } catch (e) {
+        this.$message({
+          type: "error",
+          message: e.message
+        });
+        console.error(e);
+      }
     },
 
     preview() {
       this.$store.commit("SET_QUESTIONNAIRE", this.questionnaire);
       this.$router.push("/preview");
-    }
+    },
   }
 };
 </script>
 <style scoped lang='scss'>
+// .el-input__inner {
+//   text-align:center;
+//   font-size: 2rem;
+// }
 .edit {
   padding-bottom: 5rem;
 }
@@ -249,10 +302,26 @@ export default {
   border-bottom: solid 1px #e6e6e6;
   margin-bottom: 1rem;
 }
+
+.add-label-icon,
+.remove-label-icon {
+  font-size: 1rem;
+  position: absolute;
+  top: 0rem;
+  right: 0rem;
+}
+
+.remove-label-icon {
+  right: 1.5rem;
+}
 .delete-icon {
   position: absolute;
   top: 1rem;
   right: 1rem;
+}
+
+.lable-wrapper {
+  position: relative;
 }
 
 .QN__title {
@@ -288,6 +357,7 @@ export default {
 
 .el-radio-group {
   display: block;
+  position: relative;
 }
 
 .el-radio,
@@ -305,5 +375,19 @@ export default {
 .release-button {
   width: 6rem;
   margin-left: 2rem;
+}
+
+.qr-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.cell {
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
 }
 </style>

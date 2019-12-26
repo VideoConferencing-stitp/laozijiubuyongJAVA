@@ -45,52 +45,94 @@
         </div>
       </div>
     </div>
-    <el-button class="release-button" type="primary" size="medium">提交</el-button>
+    <el-button class="submmit__button" type="primary" size="medium" @click="submmit">提交</el-button>
   </div>
 </template>
 <script>
-const getTemplate = function(type) {
-  const template = {
-    radio: {
-      type: "radio", // 单选
-      title: "这他吗的是个单选题？",
-      radio: "",
-      labels: ["10-19", "20-22", "35+"]
-    },
-    checkbox: {
-      type: "checkbox", // 多选
-      title: "这他吗的不是个多选题？",
-      checkList: [],
-      labels: ["A", "B", "C"]
-    },
-    texteare: {
-      type: "texteare", //填空
-      title: "我没告诉你这是个填空题？",
-      value: "描述你的想法"
-    }
-  };
-  return template[type];
-};
+import getQnApi from "../api/getQnApi";
+import submitQnApi from "../api/submitQnApi";
+
+const num2UpperAlpha = num => String.fromCharCode(65 + num);
+
 export default {
-  components: {},
-  name: "Edit",
-  props: {},
+  name: "Fill",
   data() {
     return {
-      questionnaire: {
-        title: "🎉🎉这里是踏🐎个标题",
-        description:
-          "你看这个碗他又大又圆，你看这个面他又长又宽你看这个碗他又大又圆，你看这个面他又长又宽",
-        questions: [
-          getTemplate("radio"),
-          getTemplate("checkbox")
-        ]
-      }
-    }
+      qnId: '',
+      questionnaire: null
+    };
+  },
+  created() {
+    this.qnId = this.$route.query['qnId']
+    console.log(this.qnId);
+    this.loadQn();
   },
   methods: {
-    async loadQuestionnaire() {
-      
+    async loadQn() {
+      try {
+        const res = await getQnApi({ qnId: this.qnId });
+        const { code, msg, data } = res;
+        if (code === 200) {
+          this.questionnaire = data;
+        } else {
+          this.$message({
+            type: "error",
+            message: msg
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    mergeQuestion() {
+      let data = {
+        qnId: "",
+        answers: []
+      };
+
+      const { id, questions } = this.questionnaire;
+      data.qnId = id;
+      questions.forEach(question => {
+        const { type, labels, qId, radio, checkList } = question;
+        let answer = {
+          qId,
+          checkList: []
+        };
+        if (type === "radio") {
+          if (labels.indexOf(radio) !== -1) {
+            answer.checkList.push(num2UpperAlpha(labels.indexOf(radio)));
+          }
+        } else {
+          checkList.forEach(radio => {
+            if (labels.indexOf(radio) !== -1) {
+              answer.checkList.push(num2UpperAlpha(labels.indexOf(radio)));
+            }
+          });
+        }
+        data.answers.push(answer);
+      });
+
+      return data;
+    },
+    async submmit() {
+      const questionnaire = this.mergeQuestion();
+      try {
+        const res = await submitQnApi(questionnaire);
+        const { code, msg } = res;
+        if (code === 200) {
+          this.$message({
+            type: "success",
+            message: msg
+          });
+        } else {
+          this.$message({
+            type: "error",
+            message: msg
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };
@@ -134,7 +176,6 @@ export default {
   margin-bottom: 3rem;
 }
 
-
 .el-radio-group {
   display: block;
 }
@@ -145,10 +186,9 @@ export default {
   padding: 0.5em;
 }
 
-
-.release-button {
+.submmit__button {
   display: block;
-  width: 10rem;
+  width: 15rem;
   margin: 0 auto;
 }
 </style>

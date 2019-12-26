@@ -1,7 +1,7 @@
 <template>
   <div class="visualize">
     <div class="header">
-      <el-page-header @back="() => $router.back()" :content="$store.state.questionnaire.title"></el-page-header>
+      <el-page-header @back="() => $router.back()" content="数据分析"></el-page-header>
     </div>
     <div class="charts-container">
       <template v-for="(chartData, index) of chartDatas">
@@ -47,13 +47,21 @@ export default {
   watch: {
     chartDatas(newV) {
       this.chartTypes = newV.map(item => Math.random() > 0.5 ? 'bar': 'pie')
+    },
+    '$store.state.currentQnId'() { // 消除 keep-alive 组件复用不更新请求数据
+        this.loadChartData()
     }
   },
   methods: {
     async loadChartData() {
-      const res = await getQnDataApi({ qnId: "12345" });
-      const { code, msg, data } = res;
-      this.chartDatas = data.chartDatas;
+      try {
+        const qnId = this.$store.state.currentQnId
+        const res = await getQnDataApi({ qnId });
+        const { code, msg, data } = res;
+        this.chartDatas = data.chartDatas;
+      } catch (e) {
+        console.error(e)
+      }
     },
     changeChartType(type, index) {
       this.chartTypes.splice(index, 1, type)
