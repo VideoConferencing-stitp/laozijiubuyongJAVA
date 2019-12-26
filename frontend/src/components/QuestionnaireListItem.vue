@@ -29,6 +29,7 @@ export default {
 <style scoped lang='scss'>
 .questionnaire-list-item {
   display: flex;
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 10px -2px;

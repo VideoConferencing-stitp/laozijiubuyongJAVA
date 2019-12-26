@@ -115,7 +115,7 @@
         </el-dropdown-menu>
       </el-dropdown>
       <el-button-group>
-        <el-button class="release-button" type="primary" @click="release">预览</el-button>
+        <el-button class="release-button" type="primary" @click="preview">预览</el-button>
         <el-button class="release-button" type="primary" @click="release">发布</el-button>
       </el-button-group>
     </div>
@@ -183,8 +183,6 @@ export default {
     handleTitleClick() {
       this.titleEditing = true;
       this.$nextTick(() => {
-        // 不在 nextick 会调中无法聚焦
-        // 原因 暂不明确
         this.$refs.inputTitleDOM.focus();
       });
     },
@@ -227,14 +225,17 @@ export default {
     },
 
     release() {
-      this.$store.commit(
-        "SET_QUESTIONNAIRE",
-        JSON.parse(JSON.stringify(this.questionnaire))
-        // 深拷贝
-        // 防止GC回收引用值
-        // 导致后续引用点失去引用
-      );
-      this.$router.push("/fill");
+
+      // 发布成功的逻辑
+      this.$message({
+        type: "success",
+        message: "发布成功"
+      });
+    },
+
+    preview() {
+      this.$store.commit("SET_QUESTIONNAIRE", this.questionnaire);
+      this.$router.push("/preview");
     }
   }
 };

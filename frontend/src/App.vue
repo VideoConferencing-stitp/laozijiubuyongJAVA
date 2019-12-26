@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "app"
+  name: "app",
 };
 </script>
 
@@ -25,6 +25,12 @@ export default {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+@media screen and (max-width: 800px) {
+  #app {
+    padding: 0 2rem;
+  } 
 }
 
 .flow-enter-active {

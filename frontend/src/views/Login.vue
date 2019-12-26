@@ -3,21 +3,17 @@
     <div class="login__wrapper">
       <h1 class="login__title">登录</h1>
       <div class="login__form">
-        <el-form
-          :model="form"
-          ref="form"
-        >
-          <el-form-item
-            prop="age"
-            :rules="[{ required: true, message: '账号不能为空'},{ type: 'number', message: '账号必须为数字值'}]"
-          >
-            <el-input placeholder="账号" type="age" v-model.number="form.age" autocomplete="off"></el-input>
+        <el-form :model="form" ref="form">
+          <el-form-item prop="account" :rules="[{ required: true, message: '账号不能为空'}]">
+            <el-input
+              placeholder="账号"
+              type="account"
+              v-model.number="form.account"
+              autocomplete="off"
+            ></el-input>
           </el-form-item>
-          <el-form-item
-            prop="age"
-            :rules="[{ required: true, message: '密码不能为空'},{ type: 'number', message: '密码必须为数字值'}]"
-          >
-            <el-input placeholder="密码" type="age" v-model.number="form.age" autocomplete="off"></el-input>
+          <el-form-item prop="password" :rules="[{ required: true, message: '密码不能为空'}]">
+            <el-input placeholder="密码" type="password" v-model.number="form.password" show-password></el-input>
           </el-form-item>
           <el-button class="login-button" type="primary" @click="submitForm('form')">登录</el-button>
         </el-form>
@@ -26,25 +22,46 @@
   </div>
 </template>
 <script>
+import checkAPApi from "../api/checkAPApi";
+
 export default {
   name: "Login",
   props: {},
   data() {
     return {
       form: {
-        age: ""
+        account: "",
+        password: ""
       }
     };
   },
   methods: {
     submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      this.$refs[formName].validate(async valid => {
         if (valid) {
-          alert("submit!");
-          this.$router.push('/home')
-        } else {
-          console.log("error submit!!");
-          return false;
+          // 表单本地校验成功
+          try {
+            // const res = await checkAPApi(this.form);
+            const res = {
+              code: 200,
+              msg: "登录成功",
+              data: {
+                userId: 10000
+              }
+            };
+
+            const { code, msg, data } = res;
+            if (code === 200) {
+              this.$store.commit("SET_USER_ID", data.userId);
+              this.$message({ type: "success", message: "登录成功" });
+              this.$router.push("/home");
+            } else {
+              this.$message({ type: "error", message: "登录失败" });
+            }
+          } catch (e) {
+            this.$message({ type: "error", message: e.message });
+            console.error(e);
+          }
         }
       });
     }
