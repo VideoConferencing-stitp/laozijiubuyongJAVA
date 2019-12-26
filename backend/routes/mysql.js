@@ -371,7 +371,7 @@ router.post('/create-qn', async (ctx) => {
     connection.end();
 
     if (reslut.code == 200) {
-        reslut.data.url = `http://139.180.145.219:54188/fill#/?qnId=+${qId}`;
+        reslut.data.url = `http://139.180.145.219:54188/fill#/?qnId=${qId}`;
     } else {
         reslut.data = null;
     }
