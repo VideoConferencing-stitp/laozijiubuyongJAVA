@@ -27,6 +27,7 @@ export default {
   },
   created() {
     this.loadQnList();
+    this.$store.commit("SET_QUESTIONNAIRE", null);
   },
   computed: {
     questionnaireList() {
@@ -37,13 +38,15 @@ export default {
     handle() {
       this.$store.commit("SET_NUMBER");
     },
-    loadQnList() {
-      getQnListApi({ userId: "123456" }).then(res => {
-        console.log(res)
+    async loadQnList() {
+      try {
+        const { userId } = this.$store.state.user;
+        const res = await getQnListApi({ userId });
+        console.log(res);
         this.$store.commit("SET_QUESTIONNAIRE_LIST", res.qnList);
-      }).catch(e => {
-        console.error(e)
-      });
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };

@@ -79,8 +79,6 @@ export default {
     return {
       questionnaire: {
         title: "🎉🎉这里是踏🐎个标题",
-        description:
-          "你看这个碗他又大又圆，你看这个面他又长又宽你看这个碗他又大又圆，你看这个面他又长又宽",
         questions: [
           getTemplate("radio"),
           getTemplate("checkbox")

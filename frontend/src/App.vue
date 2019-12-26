@@ -1,16 +1,21 @@
 <template>
-  <div id="app">
+  <div
+    id="app"
+    v-loading="$store.state.loading"
+    element-loading-background="rgba(0, 0, 0, 0.7)"
+    element-loading-text="冲冲冲！"
+  >
     <transition name="flow" appear>
-      <keep-alive>
-        <router-view></router-view>
-      </keep-alive>
+      <!-- <keep-alive> -->
+      <router-view></router-view>
+      <!-- </keep-alive> -->
     </transition>
   </div>
 </template>
 
 <script>
 export default {
-  name: "app",
+  name: "app"
 };
 </script>
 
@@ -20,6 +25,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding: 0 10rem;
+  min-height: 100vh;
 }
 * {
   margin: 0;
@@ -30,7 +36,7 @@ export default {
 @media screen and (max-width: 800px) {
   #app {
     padding: 0 2rem;
-  } 
+  }
 }
 
 .flow-enter-active {

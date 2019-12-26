@@ -48,7 +48,6 @@
         </div>
       </div>
     </div>
-    <el-button class="release-button" type="primary" size="medium">发布</el-button>
   </div>
 </template>
 <script>
@@ -112,12 +111,5 @@ export default {
 .el-checkbox {
   display: block;
   padding: 0.5em;
-}
-
-
-.release-button {
-  display: block;
-  width: 10rem;
-  margin: 0 auto;
 }
 </style>

@@ -2,12 +2,16 @@
   <div class="questionnaire-list-item">
     <span class="questionnaire-list-item__title">{{ data.title }}</span>
     <div class="questionnaire-list-item__controler">
-      <el-button type="primary" size="mini" @click="handleClick">数据</el-button>
+      <el-button type="primary" size="mini" @click="preview" plain>预览</el-button>
+      <el-button type="primary" size="mini" @click="checkData" plain>数据</el-button>
       <el-button type="danger" size="mini" @click="deleteSelf" plain>删除</el-button>
     </div>
   </div>
 </template>
 <script>
+
+import getQnApi from "../api/getQnApi"
+
 export default {
   name: "QuestionnaireListItem",
   props: {
@@ -17,7 +21,25 @@ export default {
     }
   },
   methods: {
-    handleClick() {
+    async loadQn() {
+      const { id } = this.data
+      const res = await getQnApi( { qnId: id } )
+      const { code, msg, data } = res
+      if(code === 200) {
+        this.$store.commit('SET_QUESTIONNAIRE', data)
+        this.$router.push('/preview')
+      } else {
+        this.$message({
+          type: 'error',
+          message: msg
+        })
+      }
+    },
+    preview() {
+      this.loadQn()
+    },
+    checkData() {
+      this.$store.commit('SET_CURRENT_QNID', this.data.id)
       this.$router.push('/visualize')
     },
     deleteSelf() {

@@ -22,7 +22,7 @@
   </div>
 </template>
 <script>
-import checkAPApi from "../api/checkAPApi";
+import loginApi from "../api/loginApi";
 
 export default {
   name: "Login",
@@ -37,26 +37,22 @@ export default {
   },
   methods: {
     submitForm(formName) {
+      console.log(this.form)
       this.$refs[formName].validate(async valid => {
         if (valid) {
           // 表单本地校验成功
           try {
-            // const res = await checkAPApi(this.form);
-            const res = {
-              code: 200,
-              msg: "登录成功",
-              data: {
-                userId: 10000
-              }
-            };
-
+            this.form.account = this.form.account+''
+            this.form.password = this.form.password+''
+            const res = await loginApi(this.form);
             const { code, msg, data } = res;
+            console.log(res)
             if (code === 200) {
               this.$store.commit("SET_USER_ID", data.userId);
-              this.$message({ type: "success", message: "登录成功" });
+              this.$message({ type: "success", message: msg });
               this.$router.push("/home");
             } else {
-              this.$message({ type: "error", message: "登录失败" });
+              this.$message({ type: "error", message: msg });
             }
           } catch (e) {
             this.$message({ type: "error", message: e.message });

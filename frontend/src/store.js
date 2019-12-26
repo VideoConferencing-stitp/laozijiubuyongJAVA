@@ -6,20 +6,16 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     user: {
-      id: '', // 用户id
-      questionnaireList: [ // home页面的问卷列表
-        { title: "术语速查手册 - Apache ECharts (incubating)", id: 0 },
-        { title: "Vue.js 源码构建", id: 1 },
-        { title: "2-3 运行架构设计模板", id: 2 },
-        { title: "生成活码和生成二维码有什么区别", id: 3 }
-      ]
+      userId: '', // 用户id
+      questionnaireList: []  // home页面的问卷列表
     },
-    // 当前预览的问卷
-    questionnaire: {}
+    currentQnId: '', // 最近点击的问卷Id
+    questionnaire: null, // 当前预览的问卷
+    loading: false
   },
   mutations: {
     SET_USER_ID(state, id) {
-      state.user.id = id
+      state.user.userId = id
     },
     SET_QUESTIONNAIRE_LIST(state, payload) {
       state.user.questionnaireList = payload
@@ -29,6 +25,12 @@ export default new Vuex.Store({
     },
     REMOVE_QUESTIONNAIRE_LIST(state, id) {
       state.user.questionnaireList = state.user.questionnaireList.filter(item => item.id !== id)
+    },
+    SET_CURRENT_QNID(state, qnId) {
+      state.currentQnId = qnId
+    },
+    SET_LOADING(state, value) {
+      state.loading = value
     }
   },
   actions: {
