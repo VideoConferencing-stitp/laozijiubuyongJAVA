@@ -1,5 +1,5 @@
 import http from '../lib/http'
 
-export default function checkAPApi(data) {
+export default function loginApi(data) {
   return http.post('/login', data)
 }
