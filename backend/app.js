@@ -8,11 +8,8 @@ const logger = require('koa-logger')
 const mount = require('koa-mount');
 
 const index = require('./routes/index')
-<<<<<<< Updated upstream
-const users = require('./routes/users')
-=======
 const mysql = require('./routes/mysql')
->>>>>>> Stashed changes
+const cors = require('koa2-cors')
 
 // error handler
 onerror(app)
@@ -27,6 +24,10 @@ app.use(logger())
 app.use(views(__dirname + '/views', {
   extension: 'pug'
 }))
+
+// 跨域设置 
+app.use(cors());
+
 
 // routes
 app.use(index.routes(), index.allowedMethods())
