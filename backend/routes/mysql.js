@@ -127,12 +127,17 @@ router.get('/get-qn', async (ctx, next) => {
             console.log(temp2)
             for (let j = 0; j < temp2.length; j++) {
                 labels[j] = temp2[j].qcontexts;
-            }  
+            } 
             let detail = {
                 "qId": temp[i].QuID,
                 "type": temp[i].type == "单选" ? "radio" : "checkbox",
                 "title": temp[i].contexts,
                 "labels": labels
+            }
+            if(temp[i].type=="单选"){
+                detail.radio="";
+            }else{
+                detail.checkList=[];
             }
             questions.push(detail)
         }
