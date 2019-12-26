@@ -285,6 +285,15 @@ router.get('/get-qn-data', async (ctx, next) => {
 // 新增问卷
 router.post('/create-qn', async (ctx) => {
 
+    let reslut = {
+        "code": 200,
+        "msg": "成功",
+        "data": {
+          "url": ""
+        }
+    }
+    let qId = 0;
+
     let qnData = ctx.request.body;
     // 获取创建问卷时所需的相关即时信息
     let finish_time = '2020-02-01';
@@ -303,11 +312,12 @@ router.post('/create-qn', async (ctx) => {
     }
     let temp = await query();
     if (temp.code == 501) {
-        temp.msg = "增加问卷记录失败，请重试！";
+        reslut.msg = "增加问卷记录失败，请重试！";
+        reslut.code = 501;
     } else {
 
     // 正确插入问卷后，再插入该问卷的问题
-        let qId = temp.insertId;
+        qId = temp.insertId;
         let questions = qnData.questionnaire.questions;
         // 判断是否发生错误的标记，中途一旦出错，立即修改标记并退出
         let flag = true;
@@ -320,7 +330,8 @@ router.post('/create-qn', async (ctx) => {
             }
             temp = await query();
             if (temp.code == 501) {
-                temp.msg = "增加问题失败，请重试！";
+                reslut.msg = "增加问题失败，请重试！";
+                reslut.code = 501;
                 flag = false;
                 break;
             } else {
@@ -338,16 +349,23 @@ router.post('/create-qn', async (ctx) => {
                     }
                     temp = await query();
                     if (temp.code == 501) {
-                        temp.msg = "增加选项失败，请重试！";
+                        reslut.msg = "增加选项失败，请重试！";
+                        reslut.code = 501;
                         flag = false;
                         break;
                     }
                 }
             }
         }
-        ctx.body = temp;
     }
     connection.end();
+
+    if (reslut.code == 200) {
+        reslut.data.url = "http://139.180.145.219:54188/fill?qnId=" + qId;        
+    } else {
+        reslut.data.url = "http://139.180.145.219:54188"
+    }
+    ctx.body = reslut;
 })
 
 // 连接数据库
@@ -356,7 +374,7 @@ function ConnectSQL() {
     let connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
-        password : '263785czx',
+        password : '123456',
         database : 'questionnaire_survey_system'
     });
     connection.connect();
