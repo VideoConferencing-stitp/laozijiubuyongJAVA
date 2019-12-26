@@ -18,18 +18,6 @@
         ></el-input>
         <h1 v-else @click="handleTitleClick">{{questionnaire.title}}</h1>
       </div>
-      <!-- 问卷描述 -->
-      <!-- <div class="QN__description">
-        <el-input
-          ref="inputSubtitleDOM"
-          v-if="subtitleEditing"
-          v-model="questionnaire.description"
-          :placeholder="questionnaire.description"
-          @blur="subtitleEditing = false"
-          @keyup.enter.native="subtitleEditing = false"
-        ></el-input>
-        <p v-else @click="handleSubtitleClick">{{questionnaire.description}}</p>
-      </div>-->
     </div>
     <!-- 问卷内容 -->
     <div class="QN__questions">
@@ -139,6 +127,18 @@
         <el-button class="release-button" type="primary" @click="release">发布</el-button>
       </el-button-group>
     </div>
+
+    <!-- 发布成功的信息弹层 -->
+    <el-dialog title="分享问卷" :visible.sync="dialogVisible" width="25rem" @close="dialogClose">
+      <div class="qr-wrapper">
+        <div class="cell">
+          <qrcode :value="releaseInfo.url" :options="{ width: 200 }"></qrcode>
+        </div>
+        <div class="cell">
+          <a :href="releaseInfo.url">{{releaseInfo.url}}</a>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -190,6 +190,12 @@ export default {
       questionnaire: this.$store.state.questionnaire || {
         title: "这是一个正常的标题",
         questions: [getTemplate("radio"), getTemplate("checkbox")]
+      },
+
+      dialogVisible: false,
+
+      releaseInfo: {
+        url: ""
       }
     };
   },
@@ -252,10 +258,11 @@ export default {
           questionnaire: this.questionnaire,
           userId
         });
-        console.log(res);
         const { code, msg, data } = res;
         // // 发布成功的逻辑
         if (code === 200) {
+          this.releaseInfo.url = data.url;
+          this.dialogVisible = true;
           this.$message({
             type: "success",
             message: msg
@@ -273,12 +280,15 @@ export default {
         });
         console.error(e);
       }
-      this.$router.replace('/home')
     },
 
     preview() {
       this.$store.commit("SET_QUESTIONNAIRE", this.questionnaire);
       this.$router.push("/preview");
+    },
+
+    dialogClose() {
+      this.$router.replace("/home");
     }
   }
 };
@@ -299,7 +309,6 @@ export default {
 
 .add-label-icon,
 .remove-label-icon {
-  // display: inline-block;
   font-size: 1rem;
   position: absolute;
   top: 0rem;
@@ -370,5 +379,19 @@ export default {
 .release-button {
   width: 6rem;
   margin-left: 2rem;
+}
+
+.qr-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.cell {
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
 }
 </style>

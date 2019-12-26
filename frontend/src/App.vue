@@ -2,7 +2,7 @@
   <div
     id="app"
     v-loading="$store.state.loading"
-    element-loading-background="rgba(0, 0, 0, 0.7)"
+    element-loading-background="rgba(255,255,255,0.3)"
     element-loading-text="冲冲冲！"
   >
     <transition name="flow" appear>
@@ -31,6 +31,14 @@ export default {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+a {
+  color: #333;
+}
+
+body {
+  background: white;
 }
 
 @media screen and (max-width: 800px) {
