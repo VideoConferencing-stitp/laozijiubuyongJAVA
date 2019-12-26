@@ -26,7 +26,7 @@ app.use(views(__dirname + '/views', {
 }))
 
 // 跨域设置 
-app.use(cors);
+app.use(cors());
 
 
 // routes
