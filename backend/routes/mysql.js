@@ -413,21 +413,20 @@ function GetResult(connection, sqlSentence) {
 * sql语句
 *   GET_ALL: 获取问卷列表
 *   LOGIN: 获取登录信息
-*   GET_Q_NAME: 获取指定Id的问卷名字
-*   GET_Q_LIST: 获取指定问卷Id的问题列表
 *   DELETE_QN:删除问卷
-*   GET_QN_DATA_FIRST:获取问卷数据语句前半部分
-*   GET_QN_DATA_SECOND:获取问卷数据语句后半部分
+*   GET_QN_DATA_FIRST: 获取问卷数据语句前半部分
+*   GET_QN_DATA_SECNOD: 获取问卷统计数据
 *   SUBMIT_QN_FIRST：向数据库插入提交的选项前半部分
 *   SUBMIT_QN_SECOND:向数据库插入提交的选项后半部分
+*   GET_Q_NAME: 获取指定Id的问卷名字
+*   GET_Q_LIST: 获取指定问卷Id的问题列表
+*   GET_Q_OPTIONS: 获取问卷某题的选项
 *   INSERT_QUESTIONNAIRE: 新增问卷记录
 *   INSERT_QUESTION: 新增问题记录
 *   INSERT_QOPTION: 新增选项记录
 */
 let sql = {
     GET_ALL: 'SELECT * FROM questionnaire WHERE AID = ', 
-    GET_QN_LIST: 'SELECT * FROM questionnaire_survey_system.question,questionnaire where question.QID=questionnaire.QID',
-    INSERT_QN: "INSERT INTO `questionnaire_survey_system`.`administrator` (`AID`, `telephone`, `key`) VALUES ('A2', '13322258585', '324')",
     LOGIN: "select * from administrator where telephone =",
     DELETE_QN: "DELETE FROM questionnaire_survey_system.questionnaire WHERE QID =",
     GET_QN_DATA_FIRST:"SELECT question.contexts,qoption.qcontexts,op_num FROM question,qoption WHERE  qoption.QuID in (select QuID from question where QID=",
