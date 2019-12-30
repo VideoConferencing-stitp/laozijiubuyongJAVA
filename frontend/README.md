@@ -16,6 +16,11 @@ npm run serve # 然后在 localhost:3000访问页面gst
 npm run build
 ```
 
+### 构建问卷填写页面
+```
+npm run build:fill
+```
+
 ### Lint检查
 ```
 npm run lint
